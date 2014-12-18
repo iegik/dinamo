@@ -654,13 +654,15 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
 
           console.log('rates: ', rates);
           //req.body.score = s2(game.rates[game.rates.length-1].value, req.body.value);
-          game.rates = rates;
-          return db.update(game, {
-            $set: {
-              rates: req.body
+          //game.rates = rates;
+          return db.update({
+            _id: game._id
+          }, {
+            $push: {
+              rates: rates
             }
           }, {
-            upsert: true
+
           }, function (err, numReplaced) {
             if (!err) {
               console.log("updated " + numReplaced + " rate(s)");
