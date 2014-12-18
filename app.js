@@ -782,6 +782,6 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
 
 //create node.js http server and listen on port
 dinamo_api_v2({
-  'dbpath': '/srv/dinamo'
-}).listen(80);
+  'dbpath': './'
+}).listen(process.env.PORT || 5000);
 console.log('listen on 80...');
