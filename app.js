@@ -387,6 +387,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
         scores: 1,
         rates: 1
       }, function (err, games) {
+        var x;
         if (!err) {
           for (x in games) {
             if (games[x]['scores'] && games[x].scores.length)
