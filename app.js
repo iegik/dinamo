@@ -46,65 +46,71 @@ function dinamo_api_v2(options) {
 
 
   function s2() {
+    // s2(game_score, user_rate)
     // 1. Par iesniegtu prognozi +25
     //    За внесённый прогноз
     //    For the submitted prediction
+    // 2. Nav uzminēts rezultāts: -5
+    //    Не угадан результат: -5
+    //    Incorrectly guessed the result
+    var f2 = function (x, y, w, z) {
+        return (x + ' ' + y === w + ' ' + z) ? 0 : -5;
+      }, // Точный результат
+      // 1:0 1:0 -> 0 | 1:0 3:3 -> -5 | 1:1 3:3 -> -5
+
+      // 3. Nepareizi noteikts uzvaretajs vai neizšķirts: -5 ( #># && #># ) || (#?# && #=# )
+      //    Неправильно угадан победитель или ничья: -5
+      //    Incorrectly guessed the result or draw: -5
+      f3 = function (x, y, w, z) {
+        return ((x > y && w > z) || (x < y && w < z)) || !(f2(x, y, w, z) || (x >= y && w > z) || (x < y && w < z)) || (x === y && w === z) ? 0 : -5;
+      }, // Правильный победитель или ничья 
+      // 1:0 3:2 -> 0 | 1:0 2:3 -> -5 | 1:1 3:3 -> -5 | 1:0 3:3 -> -5
+
+      // 4. Nepareizi noteikta vārtu starpība: -5
+      //    Неправильно установлена разница мячей: -5
+      //    Improperly installed goal difference: -5
+      //      ,(x>y?x-y:y-x)==(w>z?w-z:z-w)?0:-5 // Разница мячей 
+      f4 = function (x, y, w, z) {
+        return !f2(x, y, w, z) || x - y === w - z ? 0 : -5;
+      }, // Разница мячей
+      // 1:0 3:2 -> 0 | 1:0 3:1 -> -5 | 1:1 3:3 -> 0
+
+      // 5. Nepareizi noteikta vārtu starpība (par kātriem vārtiem): -1
+      //    За каждое неверо угаданное очко: -1
+      //    For every wrong guessed point: -1
+      f5 = function (x, y, w, z) {
+        var a = (x - y),
+          b = (w - z);
+        return !f2(x, y, w, z) || !f4(x, y, w, z) ? 0 : -Math.abs(a - b);
+      }, // Разница в счёте
+      // 1:0 3:2 -> 0 | 1:0 1:2 -> -2 | 1:0 3:4 -> -2 | 1:1 3:3 -> 0
+      // Math.abs(x-w)+Math.abs(y-z)
+
+      // 6. Par katru nepareizi noteikta katras komandas gūtu vārtu skaitu
+      //    Для каждого неправильно угаданного количества голов полученных каждой командой
+      //    For every wrong guessed amonut of goals each team received
+      f6 = function (x, y, w, z) {
+        return !f2(x, y, w, z) ? 0 : -(Math.abs(x - w) + Math.abs(y - z));
+      }, // Разница в счёте
+      //       ,((x>y&&w>z)||w==z)?:-Math.abs(Math.abs(x-w)-Math.abs(y-z))
+      // 1:0 3:2 -> -4 | 1:0 1:0 -> 0 | 1:0 1:2 -> -2 | 1:0 3:4 -> -6 | 1:1 3:3 -> -4
+      a,
+      b,
+      x,
+      y,
+      w,
+      z,
+      s = 25;
     if (arguments[1]) {
-      var a = arguments[0].split(':'), // x:y
-        b = arguments[1].split(':'), // w:z
-        x = a[0] * 1,
-        y = a[1] * 1, // x:y
+      a = arguments[0].split(':'); // x:y
+      b = arguments[1].split(':'); // w:z
+      x = a[0] * 1;
+      y = a[1] * 1; // x:y
 
-        w = b[0] * 1,
-        z = b[1] * 1, // w:z
+      w = b[0] * 1;
+      z = b[1] * 1; // w:z
 
-        s = 25;
-      [
-        // 2. Nav uzminēts rezultāts: -5
-        //    Не угадан результат: -5
-        //    Incorrectly guessed the result
-        function f2(x, y, w, z) {
-          return (x + ' ' + y === w + ' ' + z) ? 0 : -5;
-        }, // Точный результат
-        // 1:0 1:0 -> 0 | 1:0 3:3 -> -5 | 1:1 3:3 -> -5
-
-        // 3. Nepareizi noteikts uzvaretajs vai neizšķirts: -5 ( #># && #># ) || (#?# && #=# )
-        //    Неправильно угадан победитель или ничья: -5
-        //    Incorrectly guessed the result or draw: -5
-        function f3(x, y, w, z) {
-          return ((x > y && w > z) || (x < y && w < z)) || !(f2(x, y, w, z) || (x >= y && w > z) || (x < y && w < z)) || (x === y && w === z) ? 0 : -5;
-        }, // Правильный победитель или ничья 
-        // 1:0 3:2 -> 0 | 1:0 2:3 -> -5 | 1:1 3:3 -> -5 | 1:0 3:3 -> -5
-
-        // 4. Nepareizi noteikta vārtu starpība: -5
-        //    Неправильно установлена разница мячей: -5
-        //    Improperly installed goal difference: -5
-        //      ,(x>y?x-y:y-x)==(w>z?w-z:z-w)?0:-5 // Разница мячей 
-        function f4(x, y, w, z) {
-          return !f2(x, y, w, z) || x - y === w - z ? 0 : -5;
-        }, // Разница мячей
-        // 1:0 3:2 -> 0 | 1:0 3:1 -> -5 | 1:1 3:3 -> 0
-
-        // 5. Nepareizi noteikta vārtu starpība (par kātriem vārtiem): -1
-        //    За каждое неверо угаданное очко: -1
-        //    For every wrong guessed point: -1
-        function f5(x, y, w, z) {
-          var a = (x - y),
-            b = (w - z);
-          return !f2(x, y, w, z) || !f4(x, y, w, z) ? 0 : -Math.abs(a - b);
-        }, // Разница в счёте
-        // 1:0 3:2 -> 0 | 1:0 1:2 -> -2 | 1:0 3:4 -> -2 | 1:1 3:3 -> 0
-        // Math.abs(x-w)+Math.abs(y-z)
-
-        // 6. Par katru nepareizi noteikta katras komandas gūtu vārtu skaitu
-        //    Для каждого неправильно угаданного количества голов полученных каждой командой
-        //    For every wrong guessed amonut of goals each team received
-        function f6(x, y, w, z) {
-          return !f2(x, y, w, z) ? 0 : -(Math.abs(x - w) + Math.abs(y - z));
-        } // Разница в счёте
-        //       ,((x>y&&w>z)||w==z)?:-Math.abs(Math.abs(x-w)-Math.abs(y-z))
-        // 1:0 3:2 -> -4 | 1:0 1:0 -> 0 | 1:0 1:2 -> -2 | 1:0 3:4 -> -6 | 1:1 3:3 -> -4
-      ].forEach(function (v) {
+      [f2, f3, f4, f5, f6].forEach(function (v) {
         //console.log(v.name, v(x, y, w, z));
         return s += v(x, y, w, z);
       });
@@ -154,16 +160,19 @@ function dinamo_api_v2(options) {
         <table class="table">
           <tr>
             <tr>
+              <th style="width:10em">Date</th>
               <th>Name</th>
-              <th width="3em">Rate</th>
-              <th width="3em">Score</th>
+              <th style="width:3em">Rate</th>
+              <th style="width:3em">Score</th>
             </tr>
-            <tr ng-hide="game.rates.length" ng-repeat="rate in game.rates">
+            <tr ng-show="game.rates.length" ng-repeat="rate in game.rates">
+              <td>{{rate.date | date:'EEE, MMM d, HH:mm'}}</td>
               <td>{{rate.name}}</td>
               <td>{{rate.value}}</td>
               <td>{{rate.score}}</td>
             </tr>
-            <tr ng-show="game.rates.length">
+            <tr ng-hide="game.rates.length">
+              <td>{{game.rates.date | date:'EEE, MMM d, HH:mm'}}</td>
               <td>{{game.rates.name}}</td>
               <td>{{game.rates.value}}</td>
               <td>{{game.rates.score}}</td>
@@ -172,11 +181,13 @@ function dinamo_api_v2(options) {
         </table>
       </div>
 
-      <form class="form-inline" role="form" data-ng-submit="rateCtrl.addRate(game);" data-ng-show="isPast(game.starts)">
+      <form class="form" role="form" data-ng-submit="rateCtrl.addRate(game);" data-ng-show="isPast(game.starts)">
+        <p class="bg-warning">Pēc datu ievādīšanas, nospiediet "Refresh"; Lapa nerefrešojas automatiski.</p>
         <div class="form-group">
           <div class="input-group">
             <label class="sr-only" for="exampleInputEmail2">Name</label>
             <input class="form-control" id="exampleInputEmail2" placeholder="Name" data-ng-model="rateCtrl.rate.name" />
+            <p class="help-block bg-warning">Gārumzīmes nedarbojas, lūdzu nelietot.</p>
           </div>
         </div>
         <div class="form-group">
@@ -184,6 +195,14 @@ function dinamo_api_v2(options) {
           <input class="form-control" id="exampleInputPassword2" placeholder="0:0" data-ng-model="rateCtrl.rate.value" />
         </div>
         <button type="submit" class="btn btn-primary">Vote</button>
+      </form>
+      
+      <form class="form-inline" role="form" data-ng-submit="rateCtrl.addScore(game);" data-ng-show="isFuture(game.starts)" data-ng-show="isFuture(game.ends)">
+        <div class="form-group">
+          <label class="sr-only" for="exampleInputPassword2">Game score</label>
+          <input class="form-control" id="exampleInputPassword2" placeholder="0:0" data-ng-model="rateCtrl.score.value" />
+        </div>
+        <button type="submit" class="btn btn-primary">Add</button>
       </form>
 
     </div>
@@ -214,6 +233,9 @@ d3 = d.toJSON();
     $scope.isPast = function (date) {
       return new Date(date) > new Date();
     };
+    $scope.isFuture = function (date) {
+      return new Date(date) < new Date();
+    };
     $scope.getGames = function () {
       $http.get('/api/v2/games/').success(function (newgames) {
         $scope.games = newgames;
@@ -234,9 +256,23 @@ d3 = d.toJSON();
           game.rates.push(this.rate);
         }
         this.rate = {};
-
       });
     };
+    this.score = {};
+    this.addScore = function (game) {
+      $http.put('/api/v2/games/' + game.name + '/scores', this.score).success(function () {
+        game.scores = game.scores || [];
+        if (Object.prototype.toString.call(game.scores) === '[object Object]') {
+          game.scores = [game.scores, this.score];
+        } else {
+          game.scores.push(this.score);
+        }
+        this.score = {};
+      });
+    };
+  });
+  app.controller('ScoreController', function ($http) {
+    
   });
 }());</script>
 </body>
@@ -379,19 +415,14 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
 
     app.get('/api/v2/games', function (req, res) {
       console.log("GET:", req.url);
-      return db.find({}, {
-        name: 1,
-        starts: 1,
-        ends: 1,
-        location: 1,
-        scores: 1,
-        rates: 1
-      }, function (err, games) {
+      return db.find({}).sort({
+        starts: 1
+      }).exec(function (err, games) {
         var x;
         if (!err) {
           for (x in games) {
             if (games[x]['scores'] && games[x].scores.length)
-              games[x].scores = games[x].scores[games[x].scores.length - 1];
+              games[x].score = games[x].scores[games[x].scores.length - 1].value;
           }
           return res[req.query.callback ? 'jsonp' : 'send'](games);
         } else {
@@ -403,20 +434,22 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
     app.get('/api/v2/games/:name', function (req, res) {
       console.log("GET:", req.url);
       return db.find({
-        $regex: {
-          'name': req.params.name
+          $regex: {
+            'name': req.params.name
+          }
         }
-      }, {
+        /*, {
         name: 1,
         starts: 1,
         ends: 1
-      }, function (err, game) {
-        if (!err) {
-          return res[req.query.callback ? 'jsonp' : 'send'](game);
-        } else {
-          return console.log(err);
-        }
-      });
+      }*/
+        , function (err, game) {
+          if (!err) {
+            return res[req.query.callback ? 'jsonp' : 'send'](game);
+          } else {
+            return console.log(err);
+          }
+        });
     });
 
 
@@ -429,7 +462,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
       }, function (err, numReplaced) {
         if (!err) {
           console.log("updated " + numReplaced + " rate(s)");
-          return res[req.query.callback ? 'jsonp' : 'send'](numReplaced);
+          return res[req.query.callback ? 'jsonp' : 'sendStatus'](numReplaced);
         } else {
           console.log(err);
         }
@@ -445,7 +478,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
       }, {}, function (err, numReplaced) {
         if (!err) {
           console.log("updated " + numReplaced + " rate(s)");
-          return res[req.query.callback ? 'jsonp' : 'send'](numReplaced);
+          return res[req.query.callback ? 'jsonp' : 'sendStatus'](numReplaced);
         } else {
           console.log(err);
         }
@@ -471,7 +504,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
         if (!err) {
           console.log("removed " + numRemoved + " rate(s)");
 
-          res[req.query.callback ? 'jsonp' : 'send'](numRemoved);
+          res[req.query.callback ? 'jsonp' : 'sendStatus'](numRemoved);
         } else {
           console.log(err);
         }
@@ -486,7 +519,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
       }, {}, function (err, numRemoved) {
         if (!err) {
           console.log("removed " + numRemoved + " rate(s)");
-          return res[req.query.callback ? 'jsonp' : 'send'](numRemoved);
+          return res[req.query.callback ? 'jsonp' : 'sendStatus'](numRemoved);
         } else {
           console.log(err);
         }
@@ -520,8 +553,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
         ]);
       }
     });
-    */
-
+    
     app.post('/api/v2/games/:name/rates', jsonParser, function (req, res) {
       var rates;
       console.log("POST:", req.url, req.body);
@@ -575,6 +607,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
       });
 
     });
+    */
 
     app.get('/api/v2/games/:name/rates', function (req, res) {
       console.log("GET:", req.url, req.params.name);
@@ -625,158 +658,184 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
 
     app.put('/api/v2/games/:name/rates', jsonParser, function (req, res) {
       console.log("PUT:", req.url, req.body);
-      if (!req.body) return res.sendStatus(400)
-      db.findOne({
-        'name': req.params.name
-      }, {
-        _id: 1
-      }, function (err, game) {
-        if (!err) {
-          console.log("found game: ", game);
-          if (!game) return res.sendStatus(400);
-          if (new Date(game.starts) > Date()) return res.sendStatus(400);
-          var rates = [];
-          var checkScore = function (rate) {
-            console.log('scores: ', game.scores);
-            if (game.scores) {
-              rate.score = s2(game.scores[game.scores.length - 1].value, rate.value);
-            }
-            rates.push(rate);
-          }
-
-          if (({}).toString.call(req.body) == "[object Array]") {
-            for (var rate in req.body) {
-              !req.body[rate] || checkScore(req.body[rate])
-            };
-          } else {
-            checkScore(req.body);
-          }
-
-          console.log('rates: ', rates);
-          //req.body.score = s2(game.rates[game.rates.length-1].value, req.body.value);
-          //game.rates = rates;
-          return db.update({
-            _id: game._id
-          }, {
-            $push: {
-              rates: rates
-            }
-          }, {
-
-          }, function (err, numReplaced) {
-            if (!err) {
-              console.log("updated " + numReplaced + " rate(s)");
-              return res[req.query.callback ? 'jsonp' : 'send'](numReplaced);
-            } else {
-              console.log(err);
-            }
-          });
-        } else {
-          console.log(err);
-        }
-      });
-    });
-
-    app.put('/api/v2/games/:name/rates/:username', jsonParser, function (req, res) {
-      console.log("PUT:", req.url, req.body);
-      if (!req.body) return res.sendStatus(400)
-      req.body.name = req.params.username;
-      db.findOne({
-        $where: function () {
-          return !this.starts
+      if (!req.body && !req.body.name === true) return res.sendStatus(400)
+      var gamename = req.params.name,
+        username = req.body.name,
+        userrate = req.body.value,
+        now = (new Date()).toJSON();
+      db.update({
+        name: gamename,
+        "rates.name": {
+          $ne: username
         },
-        'name': req.params.name
+        starts: {
+          $gt: now
+        }
       }, {
-        _id: 1
-      }, function (err, game) {
+        $push: {
+          rates: {
+            date: now,
+            name: username,
+            value: userrate
+          }
+        }
+      }, function (err, numReplaced) {
         if (!err) {
-          console.log("found game: ", game);
-          if (!game) return res.sendStatus(400)
-          return db.update(game, {
-            $set: {
-              rates: req.body
-            }
-          }, {
-            upsert: true
-          }, function (err, numReplaced) {
-            if (!err) {
-              console.log("updated " + numReplaced + " rate(s)");
-              return res[req.query.callback ? 'jsonp' : 'send'](numReplaced);
-            } else {
-              console.log(err);
-            }
-          });
+          console.log("updated " + numReplaced + " rate(s)");
+          return res[req.query.callback ? 'jsonp' : 'sendStatus'](numReplaced);
         } else {
           console.log(err);
         }
       });
     });
 
-    app.delete('/api/v2/games/:name/rates', jsonParser, function (req, res) {
-
-      if (!req.body) return res.sendStatus(400)
-
-      db.find({
-        'name': req.params.name
+    app.put('/api/v2/games/:name/scores', jsonParser, function (req, res) {
+      console.log("PUT:", req.url, req.body);
+      if (!req.body && !req.body.name === true) {
+        return res.sendStatus(400);
+      }
+      var gamename = req.params.name,
+        scorevalue = req.body.value;
+      db.findOne({
+        name: gamename,
+        "scores.value": {
+          $ne: scorevalue
+        }
       }, {
         rates: 1
       }, function (err, game) {
         if (!err) {
-          console.log("found rates " + game.rates);
-          var rates = game.rates;
-          var deleteRate = function (rate) {
-            var i, v;
-            for (i in rate) {
-              for (old_rate in rates) {
-                for (j in old_rate) {
-                  if ((new RegExp(rate[i])).match(old_rate[j]))
-                    delete rates[i];
-                }
+          var i, rates = game.rates;
+          for (i in rates) {
+            rates[i].score = s2(scorevalue, rates[i].value);
+          }
+          db.update({
+            name: gamename,
+            "scores.value": {
+              $ne: scorevalue
+            }
+          }, {
+            $push: {
+              scores: {
+                date: (new Date()).toJSON(),
+                value: scorevalue
               }
             }
-          }
-
-          if (({}).toString.call(req.body) == "[object Array]") {
-            req.body.forEach(deleteRate);
-          } else {
-            deleteRate(req.body);
-          }
-          console.log("DELETE:", req.url);
-          return db.put({
-            'name': req.params.name
-          }, {
-            $set: {
-              'rates': rates
-            }
-          }, {
-            multi: true
-          }, function (err, numRemoved) {
+          }, {}, function (err, numReplaced) {
             if (!err) {
-              console.log("removed " + Number(numRemoved) + " rate(s)");
-              return res[req.query.callback ? 'jsonp' : 'send'](numRemoved);
+              console.log("updated " + numReplaced + " rate(s)");
+              return res[req.query.callback ? 'jsonp' : 'sendStatus'](numReplaced);
             } else {
               console.log(err);
             }
           });
+        } else {
+          return res.sendStatus(400);
+        }
+      });
+    });
 
+    /*
+app.put('/api/v2/games/:name/rates/:username', jsonParser, function (req, res) {
+  console.log("PUT:", req.url, req.body);
+  if (!req.body) return res.sendStatus(400)
+  req.body.name = req.params.username;
+  db.findOne({
+    $where: function () {
+      return !this.starts
+    },
+    'name': req.params.name
+  }, {
+    _id: 1
+  }, function (err, game) {
+    if (!err) {
+      console.log("found game: ", game);
+      if (!game) return res.sendStatus(400)
+      return db.update(game, {
+        $set: {
+          rates: req.body
+        }
+      }, {
+        upsert: true
+      }, function (err, numReplaced) {
+        if (!err) {
+          console.log("updated " + numReplaced + " rate(s)");
+          return res[req.query.callback ? 'jsonp' : 'send'](numReplaced);
         } else {
           console.log(err);
         }
-      })
+      });
+    } else {
+      console.log(err);
+    }
+  });
+});
 
-    });
+app.delete('/api/v2/games/:name/rates', jsonParser, function (req, res) {
 
-    app.delete('/api/v2/games/:name/rates/:username', jsonParser, function (req, res) {
+  if (!req.body) return res.sendStatus(400)
+
+  db.find({
+    'name': req.params.name
+  }, {
+    rates: 1
+  }, function (err, game) {
+    if (!err) {
+      console.log("found rates " + game.rates);
+      var rates = game.rates;
+      var deleteRate = function (rate) {
+        var i, v;
+        for (i in rate) {
+          for (old_rate in rates) {
+            for (j in old_rate) {
+              if ((new RegExp(rate[i])).match(old_rate[j]))
+                delete rates[i];
+            }
+          }
+        }
+      }
+
+      if (({}).toString.call(req.body) == "[object Array]") {
+        req.body.forEach(deleteRate);
+      } else {
+        deleteRate(req.body);
+      }
       console.log("DELETE:", req.url);
-      return db.remove({}, function (err, numRemoved) {
+      return db.put({
+        'name': req.params.name
+      }, {
+        $set: {
+          'rates': rates
+        }
+      }, {
+        multi: true
+      }, function (err, numRemoved) {
         if (!err) {
-          console.log("removed " + numRemoved + " rate(s)");
+          console.log("removed " + Number(numRemoved) + " rate(s)");
           return res[req.query.callback ? 'jsonp' : 'send'](numRemoved);
         } else {
           console.log(err);
         }
       });
-    });
+
+    } else {
+      console.log(err);
+    }
+  })
+});
+
+app.delete('/api/v2/games/:name/rates/:username', jsonParser, function (req, res) {
+console.log("DELETE:", req.url);
+return db.remove({}, function (err, numRemoved) {
+  if (!err) {
+    console.log("removed " + numRemoved + " rate(s)");
+    return res[req.query.callback ? 'jsonp' : 'send'](numRemoved);
+  } else {
+    console.log(err);
+  }
+});
+});
+*/
 
   })(db.rates);
 
