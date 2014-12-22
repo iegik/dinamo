@@ -11,13 +11,6 @@ function dinamo_api_v2(options) {
     bodyParser = require('body-parser'),
     methodOverride = require('method-override'),
     errorHandler = require('errorhandler'),
-    //CORS middleware
-    allowCrossDomain = function (req, res, next) {
-      res.header('Access-Control-Allow-Origin', '*');
-      res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-      res.header('Access-Control-Allow-Headers', 'Content-Type');
-      next();
-    },
 
     // parse application/x-www-form-urlencoded
     urlencodedParser = bodyParser.urlencoded({
@@ -43,8 +36,12 @@ function dinamo_api_v2(options) {
     dumpExceptions: true,
     showStack: true
   }));
-  app.all(allowCrossDomain);
 
+  app.all(function (req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    next();
+  });
 
   function s2() {
     // s2(game_score, user_rate)
