@@ -180,7 +180,7 @@ function dinamo_api_v2(options) {
   </style>
 </head>
 
-<body style="overflow: hidden;">
+<body style="overflow-x: hidden;">
   <div class="container" data-ng-controller="GameController" data-ng-init="getGames()">
     <header>
       <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAM8AAACYCAYAAABDCr0QAAAAGXRFWHRTb2Z0d2Fy
