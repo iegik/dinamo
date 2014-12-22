@@ -968,7 +968,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
       }, function (err, numReplaced) {
         if (!err) {
           console.log("updated " + numReplaced + " rate(s)");
-          return res[req.query.callback ? 'jsonp' : 'sendStatus'](numReplaced);
+          return res[req.query.callback ? 'jsonp' : 'send'](Object(numReplaced));
         } else {
           console.log(err);
         }
@@ -984,7 +984,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
       }, {}, function (err, numReplaced) {
         if (!err) {
           console.log("updated " + numReplaced + " rate(s)");
-          return res[req.query.callback ? 'jsonp' : 'sendStatus'](numReplaced);
+          return res[req.query.callback ? 'jsonp' : 'send'](Object(numReplaced));
         } else {
           console.log(err);
         }
@@ -1010,7 +1010,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
         if (!err) {
           console.log("removed " + numRemoved + " rate(s)");
 
-          res[req.query.callback ? 'jsonp' : 'sendStatus'](numRemoved);
+          res[req.query.callback ? 'jsonp' : 'send'](Object(numRemoved));
         } else {
           console.log(err);
         }
@@ -1025,7 +1025,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
       }, {}, function (err, numRemoved) {
         if (!err) {
           console.log("removed " + numRemoved + " rate(s)");
-          return res[req.query.callback ? 'jsonp' : 'sendStatus'](numRemoved);
+          return res[req.query.callback ? 'jsonp' : 'send'](Object(numRemoved));
         } else {
           console.log(err);
         }
@@ -1185,7 +1185,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
       }, function (err, numReplaced) {
         if (!err) {
           console.log("updated " + numReplaced + " rate(s)");
-          return res[req.query.callback ? 'jsonp' : 'sendStatus'](numReplaced);
+          return res[req.query.callback ? 'jsonp' : 'send'](Object(numReplaced));
         } else {
           console.log(err);
         }
@@ -1227,7 +1227,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
           }, {}, function (err, numReplaced) {
             if (!err) {
               console.log("updated " + numReplaced + " rate(s)");
-              return res[req.query.callback ? 'jsonp' : 'sendStatus'](numReplaced);
+              return res[req.query.callback ? 'jsonp' : 'send'](Object(numReplaced));
             } else {
               console.log(err);
             }
@@ -1263,7 +1263,7 @@ app.put('/api/v2/games/:name/rates/:username', jsonParser, function (req, res) {
       }, function (err, numReplaced) {
         if (!err) {
           console.log("updated " + numReplaced + " rate(s)");
-          return res[req.query.callback ? 'jsonp' : 'send'](numReplaced);
+          return res[req.query.callback ? 'jsonp' : 'send'](Object(numReplaced));
         } else {
           console.log(err);
         }
@@ -1315,7 +1315,7 @@ app.delete('/api/v2/games/:name/rates', jsonParser, function (req, res) {
       }, function (err, numRemoved) {
         if (!err) {
           console.log("removed " + Number(numRemoved) + " rate(s)");
-          return res[req.query.callback ? 'jsonp' : 'send'](numRemoved);
+          return res[req.query.callback ? 'jsonp' : 'send'](Object(numRemoved));
         } else {
           console.log(err);
         }
@@ -1332,7 +1332,7 @@ console.log("DELETE:", req.url);
 return db.remove({}, function (err, numRemoved) {
   if (!err) {
     console.log("removed " + numRemoved + " rate(s)");
-    return res[req.query.callback ? 'jsonp' : 'send'](numRemoved);
+    return res[req.query.callback ? 'jsonp' : 'send'](Object(numRemoved));
   } else {
     console.log(err);
   }
