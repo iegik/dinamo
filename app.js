@@ -1182,7 +1182,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
             value: userrate
           }
         }
-      }, function (err, numReplaced) {
+      }, {}, function (err, numReplaced) {
         if (!err) {
           console.log("updated " + numReplaced + " rate(s)");
           return res[req.query.callback ? 'jsonp' : 'send'](Object(numReplaced));
