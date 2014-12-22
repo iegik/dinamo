@@ -648,21 +648,13 @@ VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
               <tr ng-show="game.rates.length" ng-repeat="rate in game.rates">
                 <td>{{rate.date | date:'EEE, MMM d, HH:mm'}}</td>
                 <td>{{rate.name}}</td>
-<<<<<<< HEAD
                 <td data-ng-show="isFuture(game.starts)">{{rate.value}}</td>
-=======
-                <td data-ng-show="isPast(game.starts)">{{rate.value}}</td>
->>>>>>> 1bf1e2a1741f168ed17ead15e98b439eceb3cc3c
                 <td>{{rate.score}}</td>
               </tr>
               <tr ng-hide="game.rates.length">
                 <td>{{game.rates.date | date:'EEE, MMM d, HH:mm'}}</td>
                 <td>{{game.rates.name}}</td>
-<<<<<<< HEAD
                 <td data-ng-show="isFuture(game.starts)">{{game.rates.value}}</td>
-=======
-                <td data-ng-show="isPast(game.starts)">{{game.rates.value}}</td>
->>>>>>> 1bf1e2a1741f168ed17ead15e98b439eceb3cc3c
                 <td>{{game.rates.score}}</td>
               </tr>
             </tr>
