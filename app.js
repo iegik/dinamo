@@ -38,11 +38,10 @@ function dinamo_api_v2(options) {
   }));
 
   app.all(function (req, res, next) {
-    res.setHeader('Content-Type', 'text/html; charset=UTF-8');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.Header('Access-Control-Allow-Origin', '*');
+    res.Header('Access-Control-Allow-Credentials', true);
+    res.Header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
+    res.header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type");
     next();
   });
 
