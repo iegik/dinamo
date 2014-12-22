@@ -648,13 +648,13 @@ VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
               <tr ng-show="game.rates.length" ng-repeat="rate in game.rates">
                 <td>{{rate.date | date:'EEE, MMM d, HH:mm'}}</td>
                 <td>{{rate.name}}</td>
-                <td data-ng-show="isFuture(game.starts)">{{rate.value}}</td>
+                <td>{{rate.value}}</td>
                 <td>{{rate.score}}</td>
               </tr>
               <tr ng-hide="game.rates.length">
                 <td>{{game.rates.date | date:'EEE, MMM d, HH:mm'}}</td>
                 <td>{{game.rates.name}}</td>
-                <td data-ng-show="isFuture(game.starts)">{{game.rates.value}}</td>
+                <td>{{game.rates.value}}</td>
                 <td>{{game.rates.score}}</td>
               </tr>
             </tr>
@@ -904,6 +904,17 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
     });
     */
 
+    app.get('/api/v2/backup', function (req, res) {
+      console.log("GET:", req.url);
+      return db.find({}, function (err, games) {
+        if (!err) {
+          return res[req.query.callback ? 'jsonp' : 'send'](games);
+        } else {
+          return console.log(err);
+        }
+      });
+    });
+
     app.post('/api/v2/games', jsonParser, function (req, res) {
       console.log("POST:", req.url, req.body);
 
@@ -924,11 +935,17 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
       return db.find({}).sort({
         starts: 1
       }).exec(function (err, games) {
-        var x;
+        var x, y, scores, rates;
         if (!err) {
           for (x in games) {
-            if (games[x]['scores'] && games[x].scores.length)
-              games[x].score = games[x].scores[games[x].scores.length - 1].value;
+            scores = games[x]['scores'];
+            rates = games[x]['rates'];
+            if (scores && scores.length && true)
+              games[x].score = scores[scores.length - 1].value;
+            if (rates && rates.length && new Date(games[x].starts) > new Date() && true)
+              for (y in rates) {
+                games[x].rates[y].value = '***';
+              }
           }
           return res[req.query.callback ? 'jsonp' : 'send'](games);
         } else {
