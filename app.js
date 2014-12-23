@@ -31,20 +31,30 @@ function dinamo_api_v2(options) {
 
   options.apipath = '/api';
 
+  app.use(function (req, res, next) {
+    /*
+    res.Header('Access-Control-Allow-Origin', '*');
+    res.Header('Access-Control-Allow-Credentials', true);
+    res.Header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
+    res.header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type");
+    next();
+    */
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+
+    // intercept OPTIONS method
+    if ('OPTIONS' == req.method) {
+      res.send(200);
+    } else {
+      next();
+    }
+  });
   app.use(methodOverride());
   app.use(errorHandler({
     dumpExceptions: true,
     showStack: true
   }));
-
-  app.all(function (req, res, next) {
-    res.Header('  Access-Control-Allow-Origin', '*');
-    res.Header('Access-Control-Allow-Credentials', true);
-    res.Header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
-    res.header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type");
-    next();
-  });
-
   function s2() {
     // s2(game_score, user_rate)
     // 1. Par iesniegtu prognozi +25
@@ -946,18 +956,15 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
                 games[x].score = scores[scores.length - 1].value;
               }
             }
-            console.log(games[x].name, !!rates, (!!rates.length || ({}).toString.call(rates) === '[object Object]'), new Date(games[x].starts) > new Date(), true, !!rates && (!!rates.length || ({}).toString.call(rates) === '[object Object]') && new Date(games[x].starts) > new Date() && true);
             if (!!rates && (!!rates.length || ({}).toString.call(rates) === '[object Object]') && new Date(games[x].starts) > new Date() && true) {
               if (({}).toString.call(rates) === '[object Object]') {
                 games[x].rates.value = '***';
               } else {
                 for (y in rates) {
                   games[x].rates[y].value = '***';
-                  console.log(games[x].rates[y])
                 }
               }
             }
-            console.dir(games[x].rates);
           }
           return res[req.query.callback ? 'jsonp' : 'send'](games);
         } else {
