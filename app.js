@@ -38,7 +38,7 @@ function dinamo_api_v2(options) {
   }));
 
   app.all(function (req, res, next) {
-    res.Header('Access-Control-Allow-Origin', '*');
+    res.Header('  Access-Control-Allow-Origin', '*');
     res.Header('Access-Control-Allow-Credentials', true);
     res.Header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
     res.header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type");
@@ -939,12 +939,25 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
           for (x in games) {
             scores = games[x]['scores'];
             rates = games[x]['rates'];
-            if (scores && scores.length && true)
-              games[x].score = scores[scores.length - 1].value;
-            if (rates && rates.length && new Date(games[x].starts) > new Date() && true)
-              for (y in rates) {
-                games[x].rates[y].value = '***';
+            if (scores && (!!scores.length || ({}).toString.call(scores) === '[object Object]') && true) {
+              if (({}).toString.call(rates) === '[object Object]') {
+                games[x].score = scores.value;
+              } else {
+                games[x].score = scores[scores.length - 1].value;
               }
+            }
+            console.log(games[x].name, !!rates, (!!rates.length || ({}).toString.call(rates) === '[object Object]'), new Date(games[x].starts) > new Date(), true, !!rates && (!!rates.length || ({}).toString.call(rates) === '[object Object]') && new Date(games[x].starts) > new Date() && true);
+            if (!!rates && (!!rates.length || ({}).toString.call(rates) === '[object Object]') && new Date(games[x].starts) > new Date() && true) {
+              if (({}).toString.call(rates) === '[object Object]') {
+                games[x].rates.value = '***';
+              } else {
+                for (y in rates) {
+                  games[x].rates[y].value = '***';
+                  console.log(games[x].rates[y])
+                }
+              }
+            }
+            console.dir(games[x].rates);
           }
           return res[req.query.callback ? 'jsonp' : 'send'](games);
         } else {
@@ -1223,8 +1236,8 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
       }, {
         rates: 1
       }, function (err, game) {
-        if (!err) {
-          var i, rates = game.rates;
+        if (!err && game && true) {
+          var i, rates = game['rates'];
           for (i in rates) {
             rates[i].score = s2(scorevalue, rates[i].value);
           }
@@ -1398,5 +1411,6 @@ return db.remove({}, function (err, numRemoved) {
 //create node.js http server and listen on port
 dinamo_api_v2({
   'dbpath': './'
-}).listen(process.env.PORT || 5000);
-console.log('listen on 80...');
+}).listen(process.env.PORT || 5000, function () {
+  console.log("Server is listening on..." + (process.env.PORT || 5000))
+});
