@@ -1,5 +1,6 @@
-/*global angular, competitions, bets, $scope, require, __dirname */
+/*global angular, competitions, bets, $scope, require, __dirname, console, process */
 /*jslint white: false */
+/*jshint multistr: true */
 
 function dinamo_api_v2(options) {
   'use strict';
@@ -55,6 +56,7 @@ function dinamo_api_v2(options) {
     dumpExceptions: true,
     showStack: true
   }));
+
   function s2() {
     // s2(game_score, user_rate)
     // 1. Par iesniegtu prognozi +25
@@ -884,7 +886,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
 </pre>
 */
       }).toString().match(/\*([^]*)\*/)[1] +
-      '</body></html>')
+      '</body></html>');
   });
 
   var toRegExpAll = function (items) {
@@ -927,7 +929,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
     app.post('/api/v2/games', jsonParser, function (req, res) {
       console.log("POST:", req.url, req.body);
 
-      if (!req.body) return res.sendStatus(400)
+      if (!req.body) return res.sendStatus(400);
 
       return db.insert(req.body, function (err) {
         if (!err) {
@@ -947,8 +949,8 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
         var x, y, scores, rates;
         if (!err) {
           for (x in games) {
-            scores = games[x]['scores'];
-            rates = games[x]['rates'];
+            scores = games[x].scores;
+            rates = games[x].rates;
             if (scores && (!!scores.length || ({}).toString.call(scores) === '[object Object]') && true) {
               if (({}).toString.call(rates) === '[object Object]') {
                 games[x].score = scores.value;
@@ -976,22 +978,16 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
     app.get('/api/v2/games/:name', function (req, res) {
       console.log("GET:", req.url);
       return db.find({
-          $regex: {
-            'name': req.params.name
-          }
+        name: {
+          $regex: new RegExp(req.params.name)
         }
-        /*, {
-        name: 1,
-        starts: 1,
-        ends: 1
-      }*/
-        , function (err, game) {
-          if (!err) {
-            return res[req.query.callback ? 'jsonp' : 'send'](game);
-          } else {
-            return console.log(err);
-          }
-        });
+      }, function (err, game) {
+        if (!err) {
+          return res[req.query.callback ? 'jsonp' : 'send'](game);
+        } else {
+          return console.log(err);
+        }
+      });
     });
 
 
@@ -1032,7 +1028,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
 
       var games = {};
 
-      if (!req.body) return res.sendStatus(400)
+      if (!req.body) return res.sendStatus(400);
 
       if (({}).toString.call(req.body) == "[object Array]") {
         req.body.forEach(toRegExpAll);
@@ -1158,7 +1154,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
         rates: 1
       }, function (err, game) {
         console.log("game found", game);
-        if (!game) return res.sendStatus(400)
+        if (!game) return res.sendStatus(400);
 
         if (!err) {
           //return res[req.query.callback?'jsonp':'send'](game.rates.filter(function (score) {return score.name = ;}));
@@ -1180,11 +1176,11 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
         rates: 1
       }, function (err, game) {
         console.log("game found", game);
-        if (!game) return res.sendStatus(400)
+        if (!game) return res.sendStatus(400);
 
         game.rates = game.rates ? game.rates.filter(function (rates) {
           return rates.name == req.params.username;
-        }) : Array(null);
+        }) : new Array(null);
 
         if (!err) {
           return res[req.query.callback ? 'jsonp' : 'send'](game);
@@ -1197,7 +1193,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
 
     app.put('/api/v2/games/:name/rates', jsonParser, function (req, res) {
       console.log("PUT:", req.url, req.body);
-      if (!req.body && !req.body.name === true) return res.sendStatus(400)
+      if (!req.body && !req.body.name && true) return res.sendStatus(400);
       var gamename = req.params.name,
         username = req.body.name,
         userrate = req.body.value,
@@ -1211,7 +1207,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
           $gt: now
         }
       }, {
-        $push: {
+        $addToSet: {
           rates: {
             date: now,
             name: username,
@@ -1230,7 +1226,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
 
     app.put('/api/v2/games/:name/scores', jsonParser, function (req, res) {
       console.log("PUT:", req.url, req.body);
-      if (!req.body && !req.body.name === true) {
+      if (!req.body && !req.body.name && true) {
         return res.sendStatus(400);
       }
       var gamename = req.params.name,
@@ -1244,7 +1240,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
         rates: 1
       }, function (err, game) {
         if (!err && game && true) {
-          var i, rates = game['rates'];
+          var i, rates = game.rates;
           for (i in rates) {
             rates[i].score = s2(scorevalue, rates[i].value);
           }
@@ -1376,15 +1372,15 @@ return db.remove({}, function (err, numRemoved) {
 });
 */
 
-  };
-  RatesModel_NoSQL_v1(db.rates);
+  }
+  new RatesModel_NoSQL_v1(db.rates);
 
   var RatesModel_SQL_v1 = function (err, client, done) {
     if (!err) {
       app.post('/api/v2/games', jsonParser, function (req, res) {
         console.log("POST:", req.url, req.body);
 
-        if (!req.body) return res.sendStatus(400)
+        if (!req.body) return res.sendStatus(400);
 
         return client.query('INSERT INTO "dB".rates SELECT * FROM json_populate_record( NULL::"dB".rates, ' + req.body + ' )', function (err) {
           if (!err) {
@@ -1396,28 +1392,35 @@ return db.remove({}, function (err, numRemoved) {
         });
       });
 
-      client.query('SELECT * FROM "dB".rates', function (err, result) {
-        done();
-        if (err) {
-          console.error(err);
-          response.send("Error " + err);
-        } else {
-          response.send(result.rows);
-        }
+      app.get('/api/v2/games', jsonParser, function (req, res) {
+        console.log("POST:", req.url, req.body);
+
+        if (!req.body) return res.sendStatus(400);
+
+        return client.query('SELECT * FROM "dB".rates', function (err, result) {
+          if (!err) {
+            console.log("created");
+            return res[req.query.callback ? 'jsonp' : 'send'](result);
+          } else {
+            console.error(err);
+            return res.sendStatus(400);
+          }
+        });
       });
+
     } else {
       console.warn("Postgres SQL is not supported:", err);
     }
-  }
+  };
 
   //DatastoreSQL.connect(process.env.DATABASE_URL, RatesModel_SQL_v1);
 
   return app;
-};
+}
 
 //create node.js http server and listen on port
 dinamo_api_v2({
   'dbpath': './'
 }).listen(process.env.PORT || 5000, function () {
-  console.log("Server is listening on..." + (process.env.PORT || 5000))
+  console.log("Server is listening on..." + (process.env.PORT || 5000));
 });
