@@ -634,6 +634,7 @@ VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
       <p>Game rates</p>
     </header>
     <div class="list-group">
+      <p class="alert bg-warning text-warning">Pēc datu ievādīšanas, nospiediet "Refresh"; Lapa nerefrešojas automatiski. Gārumzīmes nedarbojas, lūdzu nelietot.</p>
       <div class="list-group-item" data-ng-repeat="game in games" data-ng-controller="RateController">
         <h3>{{game.name}}<em class="pull-right badge">{{game.score}}</em></h3>
         <p>
@@ -673,7 +674,6 @@ VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
         </div>
 
         <form class="form-inline" role="form" data-ng-submit="addRate(game);" data-ng-show="isBefore(game.starts)">
-          <p class="alert bg-warning text-warning">Pēc datu ievādīšanas, nospiediet "Refresh"; Lapa nerefrešojas automatiski. Gārumzīmes nedarbojas, lūdzu nelietot.</p>
           <div class="form-group">
             <div class="input-group">
               <label class="sr-only" for="game-{{game._id}}-rate-name">Name</label>
@@ -963,12 +963,18 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
                 games[x].score = scores[scores.length - 1].value;
               }
             }
-            if (!!rates && (!!rates.length || ({}).toString.call(rates) === '[object Object]') && new Date(games[x].starts) > new Date() && true) {
+            if (!!rates && (!!rates.length || ({}).toString.call(rates) === '[object Object]') && true) {
               if (({}).toString.call(rates) === '[object Object]') {
                 games[x].rates.value = '***';
               } else {
-                for (y in rates) {
-                  games[x].rates[y].value = '***';
+                if (new Date(games[x].starts) > new Date()) {
+                  for (y in rates) {
+                    games[x].rates[y].value = '***';
+                  }
+                } else {
+                  games[x].rates.sort(function (a, b) {
+                    return b.score - a.score;
+                  })
                 }
               }
             }
