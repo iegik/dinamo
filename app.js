@@ -170,7 +170,7 @@ function dinamo_api_v2(options) {
     #videobg {
       background: #761c23;
       background-image: radial-gradient(rgba(0, 0, 0, .8), rgba(0, 0, 0, 0));
-      position: absolute;
+      position: fixed;
       right: 0;
       bottom: 0;
       min-width: 164%;
@@ -634,7 +634,6 @@ VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
       <p>Game rates</p>
     </header>
     <div class="list-group">
-      <p class="alert bg-warning text-warning">Pēc datu ievādīšanas, nospiediet "Refresh"; Lapa nerefrešojas automatiski. Gārumzīmes nedarbojas, lūdzu nelietot.</p>
       <div class="list-group-item" data-ng-repeat="game in games" data-ng-controller="RateController">
         <h3>{{game.name}}<em class="pull-right badge">{{game.score}}</em></h3>
         <p>
@@ -731,12 +730,12 @@ VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
           $scope.getGames();
         };
       });
-      app.controller('RateController', function ($scope, $http) {
+      app.controller('RateController', function ($scope, $http, $window) {
         $scope.rate = {};
         $scope.addRate = function (game) {
+          $scope.rate.date = new Date();
           $http.put(api + '/games/' + game.name + '/rates', $scope.rate).success(function () {
             game.rates = game.rates || [];
-            $scope.rate.date = new Date();
             if (game.rates.push) {
               game.rates.push($scope.rate);
             } else {
@@ -755,6 +754,7 @@ VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
               game.scores = [game.scores, $scope.score];
             }
             $scope.score = {};
+            $window.location.reload();
           });
         };
       });
