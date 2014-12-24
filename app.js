@@ -634,7 +634,7 @@ VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
       <p>Game rates</p>
     </header>
     <div class="list-group">
-      <div class="list-group-item" data-ng-repeat="game in games" data-ng-controller="RateController as rateCtrl">
+      <div class="list-group-item" data-ng-repeat="game in games" data-ng-controller="RateController">
         <h3>{{game.name}}<em class="pull-right badge">{{game.score}}</em></h3>
         <p>
           <i class="glyphicon glyphicon-calendar"></i>
@@ -672,25 +672,25 @@ VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
           </table>
         </div>
 
-        <form class="form-inline" role="form" data-ng-submit="rateCtrl.addRate(game);" data-ng-show="isPast(game.starts)">
+        <form class="form-inline" role="form" data-ng-submit="addRate(game);" data-ng-show="isBefore(game.starts)">
           <p class="alert bg-warning text-warning">Pēc datu ievādīšanas, nospiediet "Refresh"; Lapa nerefrešojas automatiski. Gārumzīmes nedarbojas, lūdzu nelietot.</p>
           <div class="form-group">
             <div class="input-group">
-              <label class="sr-only" for="exampleInputEmail2">Name</label>
-              <input class="form-control" id="exampleInputEmail2" placeholder="Name" data-ng-model="rateCtrl.rate.name" />
+              <label class="sr-only" for="game-{{game._id}}-rate-name">Name</label>
+              <input class="form-control" id="game-{{game._id}}-rate-name" placeholder="Name" data-ng-model="rate.name" />
             </div>
           </div>
           <div class="form-group">
-            <label class="sr-only" for="exampleInputPassword2">Rate</label>
-            <input class="form-control" id="exampleInputPassword2" placeholder="0:0" data-ng-model="rateCtrl.rate.value" />
+            <label class="sr-only" for="game-{{game._id}}-rate-value">Rate</label>
+            <input class="form-control" id="game-{{game._id}}-rate-value" placeholder="0:0" data-ng-model="rate.value" />
           </div>
           <button type="submit" class="btn btn-primary">Vote</button>
         </form>
 
-        <form class="form-inline" role="form" data-ng-submit="rateCtrl.addScore(game);" data-ng-show="isFuture(game.starts)" data-ng-show="isFuture(game.ends)">
+        <form class="form-inline" role="form" data-ng-submit="addScore(game);" data-ng-show="isBetween(game.starts,game.ends)">
           <div class="form-group">
-            <label class="sr-only" for="exampleInputPassword2">Game score</label>
-            <input class="form-control" id="exampleInputPassword2" placeholder="0:0" data-ng-model="rateCtrl.score.value" />
+            <label class="sr-only" for="game-{{game._id}}-score-value">Game score</label>
+            <input class="form-control" id="game-{{game._id}}-score-value" placeholder="0:0" data-ng-model="score.value" />
           </div>
           <button type="submit" class="btn btn-primary">Add</button>
         </form>
@@ -712,10 +712,14 @@ VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
         $scope.games = games;
         $scope.game = {};
         $scope.rate = {};
-        $scope.isPast = function (date) {
+        $scope.isBefore = function (date) {
           return new Date(date) > new Date();
         };
-        $scope.isFuture = function (date) {
+        $scope.isBetween = function (from, until) {
+          var now = new Date();
+          return new Date(from) < now && (now < new Date(until) || !until);
+        };
+        $scope.isAfter = function (date) {
           return new Date(date) < new Date();
         };
         $scope.getGames = function () {
@@ -727,29 +731,30 @@ VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
           $scope.getGames();
         };
       });
-      app.controller('RateController', function ($http) {
-        this.rate = {};
-        this.addRate = function (game) {
-          $http.put(api + '/games/' + game.name + '/rates', this.rate).success(function () {
+      app.controller('RateController', function ($scope, $http) {
+        $scope.rate = {};
+        $scope.addRate = function (game) {
+          $http.put(api + '/games/' + game.name + '/rates', $scope.rate).success(function () {
             game.rates = game.rates || [];
-            if (Object.prototype.toString.call(game.rates) === '[object Object]') {
-              game.rates = [game.rates, this.rate];
+            $scope.rate.date = new Date();
+            if (game.rates.push) {
+              game.rates.push($scope.rate);
             } else {
-              game.rates.push(this.rate);
+              game.rates = [game.rates, $scope.rate];
             }
-            this.rate = {};
+            $scope.rate = {};
           });
         };
-        this.score = {};
-        this.addScore = function (game) {
-          $http.put(api + '/games/' + game.name + '/scores', this.score).success(function () {
+        $scope.score = {};
+        $scope.addScore = function (game) {
+          $http.put(api + '/games/' + game.name + '/scores', $scope.score).success(function () {
             game.scores = game.scores || [];
-            if (Object.prototype.toString.call(game.scores) === '[object Object]') {
-              game.scores = [game.scores, this.score];
+            if (game.scores.push) {
+              game.scores.push($scope.score);
             } else {
-              game.scores.push(this.score);
+              game.scores = [game.scores, $scope.score];
             }
-            this.score = {};
+            $scope.score = {};
           });
         };
       });
