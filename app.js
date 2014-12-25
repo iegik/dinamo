@@ -681,7 +681,7 @@ VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
           </div>
           <div class="form-group">
             <label class="sr-only" for="game-{{game._id}}-rate-value">Rate</label>
-            <input class="form-control" id="game-{{game._id}}-rate-value" placeholder="0:0" data-ng-model="rate.value" />
+            <input class="form-control" id="game-{{game._id}}-rate-value" placeholder="0:0" data-ng-model="rate.value" pattern="\d+:\d+" />
           </div>
           <button type="submit" class="btn btn-primary">Vote</button>
         </form>
@@ -689,7 +689,7 @@ VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
         <form class="form-inline" role="form" data-ng-submit="addScore(game);" data-ng-show="isBetween(game.starts,game.ends)">
           <div class="form-group">
             <label class="sr-only" for="game-{{game._id}}-score-value">Game score</label>
-            <input class="form-control" id="game-{{game._id}}-score-value" placeholder="0:0" data-ng-model="score.value" />
+            <input class="form-control" id="game-{{game._id}}-score-value" placeholder="0:0" data-ng-model="score.value" pattern="\d+:\d+" />
           </div>
           <button type="submit" class="btn btn-primary">Add</button>
         </form>
@@ -932,7 +932,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
     });
 
     app.post('/api/v2/games', jsonParser, function (req, res) {
-      console.log("POST:", req.url, req.body);
+      console.log("POST:", req.url); //, req.body);
 
       if (!req.body) return res.sendStatus(400);
 
