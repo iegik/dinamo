@@ -12,25 +12,117 @@ function dinamo_api_v2(options) {
     bodyParser = require('body-parser'),
     methodOverride = require('method-override'),
     errorHandler = require('errorhandler'),
+    passport = require('passport'),
+    FacebookStrategy = require('passport-facebook').Strategy,
+    expressSession = require('express-session'),
 
     // parse application/x-www-form-urlencoded
     urlencodedParser = bodyParser.urlencoded({
       extended: false
     }),
-
     // parse application/json
     jsonParser = bodyParser.json(),
-
     app = new Express(),
-
+    basepath = (options.dbpath || __dirname),
+    apipath = options.apipath || '/api',
     db = {
       "rates": new DatastoreNoSQL({
-        filename: (options.dbpath || __dirname) + '/rates.db',
+        filename: basepath + '/rates.db',
+        autoload: true
+      }),
+      "users": new DatastoreNoSQL({
+        filename: basepath + '/users.db',
         autoload: true
       })
     };
 
-  options.apipath = '/api';
+  passport.serializeUser(function (user, done) {
+    done(null, user);
+  });
+
+  passport.deserializeUser(function (user, done) {
+    //db.users.findOne(user, function (err, user) {
+    done(null, user);
+    //});
+  });
+  /*db.users.remove({}, {
+    multi: true
+  }); //FIXME*/
+  passport.use(new FacebookStrategy({
+      clientID: process.env.FACEBOOK_APP_ID || '705103909550016',
+      clientSecret: process.env.FACEBOOK_APP_SECRET || '2b985e4f4e03a628d6c111178b444428',
+      callbackURL: "http://" + (process.env.DOMAIN || 'localhost:5000') + "/auth/facebook/callback"
+    },
+    function (accessToken, refreshToken, profile, done) {
+      // asynchronous verification, for effect...
+      process.nextTick(function () {
+
+        // To keep the example simple, the user's Facebook profile is returned to
+        // represent the logged-in user.  In a typical application, you would want
+        // to associate the Facebook account with a user record in your database,
+        // and return that user instead.
+        db.users.findOne({
+          facebookId: profile.id
+        }, function (err, user) {
+          if (err) {
+            console.error(err);
+            return done(err);
+          }
+          if (!user) {
+            //create user User.create...
+            db.users.insert({
+              facebookId: profile.id,
+              facebookProfile: profile,
+              accessToken: accessToken,
+              refreshToken: refreshToken,
+              username: profile.username,
+              fullname: profile.displayName,
+              gender: profile.gender,
+              role: profile.username === 'iegik' ? 'admin' : 'player'
+            }, function (err, user) {
+              if (err) {
+                console.error(err);
+                return done(err);
+              } else {
+                done(null, {
+                  _id: user._id,
+                  accessToken: accessToken,
+                  refreshToken: refreshToken,
+                  username: user.username,
+                  fullname: user.fullname,
+                  gender: user.gender,
+                  role: user.role
+                });
+              }
+            });
+          } else { //add this else
+            db.users.update({
+              _id: user._id
+            }, {
+              $set: {
+                accessToken: accessToken,
+                refreshToken: refreshToken
+              }
+            });
+            return done(null, {
+              _id: user._id,
+              accessToken: accessToken,
+              refreshToken: refreshToken,
+              username: user.username,
+              fullname: user.fullname,
+              gender: user.gender,
+              role: user.role
+            });
+          }
+        });
+      });
+    }));
+
+  app.use(expressSession({
+    secret: process.env.DINAMO_APP_SECRET || 'dinamo'
+  }));
+  app.use(passport.initialize());
+  app.use(passport.session());
 
   app.use(function (req, res, next) {
     /*
@@ -45,7 +137,7 @@ function dinamo_api_v2(options) {
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
 
     // intercept OPTIONS method
-    if ('OPTIONS' == req.method) {
+    if ('OPTIONS' === req.method) {
       res.send(200);
     } else {
       next();
@@ -134,12 +226,86 @@ function dinamo_api_v2(options) {
     return 0;
   }
 
-  app.all('/api', function (req, res) {
-    res.redirect('/api/v2');
+  // Redirect the user to Facebook for authentication.  When complete,
+  // Facebook will redirect the user back to the application at
+  //     /auth/facebook/callback
+  app.get('/auth/facebook', passport.authenticate('facebook'));
+
+  // Facebook will redirect the user to this URL after approval.  Finish the
+  // authentication process by attempting to obtain an access token.  If
+  // access was granted, the user will be logged in.  Otherwise,
+  // authentication has failed.
+  app.get('/auth/facebook/callback',
+    passport.authenticate('facebook', {
+      successRedirect: '/',
+      failureRedirect: '/login'
+    }));
+  /*
+  app.post('/login', passport.authenticate('local', {
+    successRedirect: '/',
+    failureRedirect: '/login'
+  }));
+*/
+  app.get('/login', function (req, res) {
+    return res.send((function () {
+      /*<!DOCTYPE html>
+<html lang="en" data-ng-app="app">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    .profile-img{
+      border-radius:100%;
+      padding: 2em;
+    }
+    .account-wall {
+      background: rgba(128,128,128,.1);
+      border-radius: 6px;
+      padding: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-6 col-md-4 col-md-offset-4 text-center">
+        <h1 class="login-title">Sign in</h1>
+        <div class="account-wall">
+          <img class="profile-img" src="https://lh5.googleusercontent.com/-b0-k99FZlyE/AAAAAAAAAAI/AAAAAAAAAAA/eu7opA4byxI/photo.jpg?sz=120"/>
+          <a href="/auth/facebook" class="btn btn-lg btn-primary btn-block">Login with Facebook</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>*/
+    }).toString().match(/\*([^]*)\*/)[1]);
   });
 
+  apipath === '/api' || app.all('/api', function (req, res) {
+    res.redirect(apipath + '');
+  });
 
-  app.get('/', function (req, res) {
+  // As with any middleware it is quintessential to call next()
+  // if the user is authenticated
+  var isAuthenticated = function (req, res, next) {
+    if (req.isAuthenticated()) {
+      return next();
+    }
+    res.redirect('/login');
+  };
+
+  var isAdmin = function (req, res, next) {
+    if (req.user.role === 'admin') {
+      return next();
+    }
+    res.sendStatus(403);
+  };
+
+  app.get('/', isAuthenticated, function (req, res) {
     return res.send((function () {
       /*
 <!DOCTYPE html>
@@ -673,12 +839,12 @@ VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
         </div>
 
         <form class="form-inline" role="form" data-ng-submit="addRate(game);" data-ng-show="isBefore(game.starts)">
-          <div class="form-group">
+          <!--div class="form-group">
             <div class="input-group">
               <label class="sr-only" for="game-{{game._id}}-rate-name">Name</label>
               <input class="form-control" id="game-{{game._id}}-rate-name" placeholder="Name" data-ng-model="rate.name" />
             </div>
-          </div>
+          </div-->
           <div class="form-group">
             <label class="sr-only" for="game-{{game._id}}-rate-value">Rate</label>
             <input class="form-control" id="game-{{game._id}}-rate-value" placeholder="0:0" data-ng-model="rate.value" pattern="\d+:\d+" />
@@ -701,7 +867,7 @@ VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
   <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.3/angular.min.js"></script>
   <script>
     //FIXME: For tests only
-    var api = '/api/v2';
+    var api = '/api';
 
     (function () {
       'use strict';
@@ -711,6 +877,7 @@ VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
         $scope.games = games;
         $scope.game = {};
         $scope.rate = {};
+        $scope.user = user;
         $scope.isBefore = function (date) {
           return new Date(date) > new Date();
         };
@@ -733,13 +900,18 @@ VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
       app.controller('RateController', function ($scope, $http, $window) {
         $scope.rate = {};
         $scope.addRate = function (game) {
+          $scope.rate.name = user.fullname;
           $scope.rate.date = new Date();
           $http.put(api + '/games/' + game.name + '/rates', $scope.rate).success(function () {
-            game.rates = game.rates || [];
-            if (game.rates.push) {
+            if (game.rates && game.rates.filter) {
+              game.rates = game.rates.filter(function(a){return a.name !== $scope.user.fullname });
               game.rates.push($scope.rate);
             } else {
-              game.rates = [game.rates, $scope.rate];
+              if(game.rates && game.rates.name !== $scope.user.fullname){
+                game.rates = [game.rates, $scope.rate];
+              }else{
+                game.rates = $scope.rate;
+              }
             }
             $scope.rate = {};
           });
@@ -796,16 +968,12 @@ VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
         }
       });
     }
-  </script>
-</body>
-
-</html>
 */
-    }).toString().match(/\*([^]*)\*/)[1]);
+    }).toString().match(/\*([^]*)\*/)[1] + 'var user = ' + JSON.stringify(req.user) + '</script></body></html>');
   });
 
 
-  app.get('/api/v2', function (req, res) {
+  app.get(apipath + '', isAuthenticated, function (req, res) {
     return res.send(
       '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"><link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet"/></head><body class="container">' +
       marked('# Dinamo API v2\n\
@@ -824,7 +992,7 @@ VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
         'ends': null,
         'rates': [
           {
-            'name': 'XXXXXXX',
+            'name': req.fullname || 'XXXXXXX',
             'value': 'X:X',
             'score': 0
           }, // 6
@@ -920,7 +1088,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
     });
     */
 
-    app.get('/api/v2/backup', function (req, res) {
+    app.get(apipath + '/backup', function (req, res) {
       console.log("GET:", req.url);
       return db.find({}, function (err, games) {
         if (!err) {
@@ -931,7 +1099,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
       });
     });
 
-    app.post('/api/v2/games', jsonParser, function (req, res) {
+    app.post(apipath + '/games', [isAuthenticated, isAdmin, jsonParser], function (req, res) {
       console.log("POST:", req.url); //, req.body);
 
       if (!req.body) return res.sendStatus(400);
@@ -946,12 +1114,17 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
       });
     });
 
-    app.get('/api/v2/games', function (req, res) {
+    app.get(apipath + '/games', function (req, res) {
       console.log("GET:", req.url);
       return db.find({}).sort({
         starts: 1
       }).exec(function (err, games) {
         var x, y, scores, rates;
+
+        function sortScoreDesc(a, b) {
+          return b.score - a.score;
+        }
+
         if (!err) {
           for (x in games) {
             scores = games[x].scores;
@@ -963,18 +1136,19 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
                 games[x].score = scores[scores.length - 1].value;
               }
             }
+
             if (!!rates && (!!rates.length || ({}).toString.call(rates) === '[object Object]') && true) {
               if (({}).toString.call(rates) === '[object Object]') {
-                games[x].rates.value = '***';
+                if (new Date(games[x].starts) > new Date()) {
+                  games[x].rates.value = '***';
+                }
               } else {
                 if (new Date(games[x].starts) > new Date()) {
                   for (y in rates) {
                     games[x].rates[y].value = '***';
                   }
                 } else {
-                  games[x].rates.sort(function (a, b) {
-                    return b.score - a.score;
-                  })
+                  games[x].rates.sort(sortScoreDesc);
                 }
               }
             }
@@ -986,7 +1160,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
       });
     });
 
-    app.get('/api/v2/games/:name', function (req, res) {
+    app.get(apipath + '/games/:name', function (req, res) {
       console.log("GET:", req.url);
       return db.find({
         name: {
@@ -1002,7 +1176,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
     });
 
 
-    app.put('/api/v2/games', jsonParser, function (req, res) {
+    app.put(apipath + '/games', [isAuthenticated, jsonParser], function (req, res) {
       console.log("PUT:", req.url, req.body);
       return db.update({}, {
         $set: req.body
@@ -1018,7 +1192,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
       });
     });
 
-    app.put('/api/v2/games/:name', jsonParser, function (req, res) {
+    app.put(apipath + '/games/:name', [isAuthenticated, isAdmin, jsonParser], function (req, res) {
       console.log("PUT:", req.url, req.body);
       return db.update({
         'name': req.params.name
@@ -1034,7 +1208,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
       });
     });
 
-    app.delete('/api/v2/games', jsonParser, function (req, res) {
+    app.delete(apipath + '/games', [isAuthenticated, isAdmin, jsonParser], function (req, res) {
       console.log("DELETE:", req.url, req.body);
 
       var games = {};
@@ -1061,7 +1235,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
 
     });
 
-    app.delete('/api/v2/games/:name', jsonParser, function (req, res) {
+    app.delete(apipath + '/games/:name', [isAuthenticated, isAdmin, jsonParser], function (req, res) {
       console.log("DELETE:", req.url);
       return db.remove({
         'name': req.params.name
@@ -1100,7 +1274,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
       }
     });
     
-    app.post('/api/v2/games/:name/rates', jsonParser, function (req, res) {
+    app.post(apipath + '/games/:name/rates', jsonParser, function (req, res) {
       var rates;
       console.log("POST:", req.url, req.body);
       if (!req.body) return res.sendStatus(400)
@@ -1155,7 +1329,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
     });
     */
 
-    app.get('/api/v2/games/:name/rates', function (req, res) {
+    app.get(apipath + '/games/:name/rates', function (req, res) {
       console.log("GET:", req.url, req.params.name);
 
       return db.findOne({
@@ -1176,7 +1350,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
       });
     });
 
-    app.get('/api/v2/games/:name/rates/:username', function (req, res) {
+    app.get(apipath + '/games/:name/rates/:username', function (req, res) {
       console.log("GET:", req.url, req.params.name);
 
       return db.findOne({
@@ -1202,11 +1376,11 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
     });
 
 
-    app.put('/api/v2/games/:name/rates', jsonParser, function (req, res) {
-      console.log("PUT:", req.url, req.body);
+    app.put(apipath + '/games/:name/rates', [isAuthenticated, jsonParser], function (req, res) {
+      console.log("PUT:", req.url, req.body, req.user.fullname);
       if (!req.body && !req.body.name && true) return res.sendStatus(400);
       var gamename = req.params.name,
-        username = req.body.name,
+        username = req.user.fullname, // || req.body.name,
         userrate = req.body.value,
         now = (new Date()).toJSON();
       db.update({
@@ -1235,7 +1409,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
       });
     });
 
-    app.put('/api/v2/games/:name/scores', jsonParser, function (req, res) {
+    app.put(apipath + '/games/:name/scores', [isAuthenticated, jsonParser], function (req, res) {
       console.log("PUT:", req.url, req.body);
       if (!req.body && !req.body.name && true) {
         return res.sendStatus(400);
@@ -1282,7 +1456,7 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
     });
 
     /*
-app.put('/api/v2/games/:name/rates/:username', jsonParser, function (req, res) {
+app.put(apipath + '/games/:name/rates/:username', jsonParser, function (req, res) {
   console.log("PUT:", req.url, req.body);
   if (!req.body) return res.sendStatus(400)
   req.body.name = req.params.username;
@@ -1317,7 +1491,7 @@ app.put('/api/v2/games/:name/rates/:username', jsonParser, function (req, res) {
   });
 });
 
-app.delete('/api/v2/games/:name/rates', jsonParser, function (req, res) {
+app.delete(apipath + '/games/:name/rates', jsonParser, function (req, res) {
 
   if (!req.body) return res.sendStatus(400)
 
@@ -1370,7 +1544,7 @@ app.delete('/api/v2/games/:name/rates', jsonParser, function (req, res) {
   })
 });
 
-app.delete('/api/v2/games/:name/rates/:username', jsonParser, function (req, res) {
+app.delete(apipath + '/games/:name/rates/:username', jsonParser, function (req, res) {
 console.log("DELETE:", req.url);
 return db.remove({}, function (err, numRemoved) {
   if (!err) {
@@ -1388,7 +1562,7 @@ return db.remove({}, function (err, numRemoved) {
 
   var RatesModel_SQL_v1 = function (err, client, done) {
     if (!err) {
-      app.post('/api/v2/games', jsonParser, function (req, res) {
+      app.post(apipath + '/games', jsonParser, function (req, res) {
         console.log("POST:", req.url, req.body);
 
         if (!req.body) return res.sendStatus(400);
@@ -1403,7 +1577,7 @@ return db.remove({}, function (err, numRemoved) {
         });
       });
 
-      app.get('/api/v2/games', jsonParser, function (req, res) {
+      app.get(apipath + '/games', jsonParser, function (req, res) {
         console.log("POST:", req.url, req.body);
 
         if (!req.body) return res.sendStatus(400);

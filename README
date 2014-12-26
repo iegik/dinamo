@@ -1,4 +1,8 @@
 # Dinamo
 
-testing...
-testing...
+## Installation
+
+```
+npm install
+npm start
+```
