@@ -1,276 +1,272 @@
 /*global angular, competitions, bets, $scope, require, __dirname, console, process */
 /*jslint white: false */
 /*jshint multistr: true */
-function dinamoapp(options) {
-  'use strict'
-  var Express = require("express"),
-    //fs = require('fs'),
-    //http = require('http'),
-    //https = require('https'),
-    DatastoreNoSQL = require('nedb'),
-    DatastoreSQL = require('pg'),
-    marked = require('marked'),
-    XMLHttpRequest = require('xhr2'),
-    bodyParser = require('body-parser'),
-    methodOverride = require('method-override'),
-    errorHandler = require('errorhandler'),
-    passport = require('passport'),
-    FacebookStrategy = require('passport-facebook-canvas').Strategy,
-    expressSession = require('express-session'),
+var Express = require("express"),
+  //fs = require('fs'),
+  http = require('http'),
+  https = require('https'),
+  DatastoreNoSQL = require('nedb'),
+  DatastoreSQL = require('pg'),
+  marked = require('marked'),
+  XMLHttpRequest = require('xhr2'),
+  bodyParser = require('body-parser'),
+  methodOverride = require('method-override'),
+  errorHandler = require('errorhandler'),
+  passport = require('passport'),
+  FacebookStrategy = require('passport-facebook-canvas').Strategy,
+  expressSession = require('express-session'),
 
-    // parse application/x-www-form-urlencoded
-    urlencodedParser = bodyParser.urlencoded({
-      extended: false
+  // parse application/x-www-form-urlencoded
+  urlencodedParser = bodyParser.urlencoded({
+    extended: false
+  }),
+  // parse application/json
+  jsonParser = bodyParser.json(),
+  app = new Express(),
+  basepath = __dirname,
+  apipath = '/api',
+  db = {
+    "rates": new DatastoreNoSQL({
+      filename: basepath + '/rates.db',
+      autoload: true
     }),
-    // parse application/json
-    jsonParser = bodyParser.json(),
-    app = new Express(),
-    basepath = (options && options.dbpath || __dirname),
-    apipath = options && options.apipath || '/api',
-    db = {
-      "rates": new DatastoreNoSQL({
-        filename: basepath + '/rates.db',
-        autoload: true
-      }),
-      "users": new DatastoreNoSQL({
-        filename: basepath + '/users.db',
-        autoload: true
-      })
-    }
-    /*,
-    certificate = {
-      key: fs.readFileSync(path.resolve(__dirname, './self_signed_ssl.key'), 'utf8'),
-      cert: fs.readFileSync(path.resolve(__dirname, './self_signed_ssl.crt'), 'utf8')
-    }*/
-  ;
+    "users": new DatastoreNoSQL({
+      filename: basepath + '/users.db',
+      autoload: true
+    })
+  },
+  certificate = {
+    key: fs.readFileSync(path.resolve(__dirname, './self_signed_ssl.key'), 'utf8'),
+    cert: fs.readFileSync(path.resolve(__dirname, './self_signed_ssl.crt'), 'utf8')
+  };
 
-  passport.serializeUser(function (user, done) {
-    done(null, user);
-  });
+passport.serializeUser(function (user, done) {
+  done(null, user);
+});
 
-  passport.deserializeUser(function (user, done) {
-    //db.users.findOne(user, function (err, user) {
-    done(null, user);
-    //});
-  });
-  /*db.users.remove({}, {
+passport.deserializeUser(function (user, done) {
+  //db.users.findOne(user, function (err, user) {
+  done(null, user);
+  //});
+});
+/*db.users.remove({}, {
     multi: true
   }); //FIXME*/
-  passport.use(new FacebookStrategy({
-      clientID: process.env.FACEBOOK_APP_ID || '705103909550016',
-      clientSecret: process.env.FACEBOOK_APP_SECRET || '2b985e4f4e03a628d6c111178b444428',
-      callbackURL: "https://" + (process.env.DOMAIN || 'localhost:5000') + "/auth/facebook/callback"
-    },
-    function (accessToken, refreshToken, profile, done) {
-      // asynchronous verification, for effect...
-      process.nextTick(function () {
+passport.use(new FacebookStrategy({
+    clientID: process.env.FACEBOOK_APP_ID || '705103909550016',
+    clientSecret: process.env.FACEBOOK_APP_SECRET || '2b985e4f4e03a628d6c111178b444428',
+    callbackURL: "https://" + (process.env.DOMAIN || 'localhost:5000') + "/auth/facebook/callback"
+  },
+  function (accessToken, refreshToken, profile, done) {
+    // asynchronous verification, for effect...
+    process.nextTick(function () {
 
-        // To keep the example simple, the user's Facebook profile is returned to
-        // represent the logged-in user.  In a typical application, you would want
-        // to associate the Facebook account with a user record in your database,
-        // and return that user instead.
-        db.users.findOne({
-          facebookId: profile.id
-        }, function (err, user) {
-          if (err) {
-            console.error(err);
-            return done(err);
-          }
-          if (!user) {
-            //create user User.create...
-            db.users.insert({
-              facebookId: profile.id,
-              facebookProfile: profile,
-              accessToken: accessToken,
-              refreshToken: refreshToken,
-              username: profile.username,
-              fullname: profile.displayName,
-              gender: profile.gender,
-              role: profile.username === 'iegik' ? 'admin' : 'player'
-            }, function (err, user) {
-              if (err) {
-                console.error(err);
-                return done(err);
-              } else {
-                done(null, {
-                  _id: user._id,
-                  accessToken: accessToken,
-                  refreshToken: refreshToken,
-                  username: user.username,
-                  fullname: user.fullname,
-                  gender: user.gender,
-                  role: user.role
-                });
-              }
-            });
-          } else { //add this else
-            db.users.update({
-              _id: user._id
-            }, {
-              $set: {
+      // To keep the example simple, the user's Facebook profile is returned to
+      // represent the logged-in user.  In a typical application, you would want
+      // to associate the Facebook account with a user record in your database,
+      // and return that user instead.
+      db.users.findOne({
+        facebookId: profile.id
+      }, function (err, user) {
+        if (err) {
+          console.error(err);
+          return done(err);
+        }
+        if (!user) {
+          //create user User.create...
+          db.users.insert({
+            facebookId: profile.id,
+            facebookProfile: profile,
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            username: profile.username,
+            fullname: profile.displayName,
+            gender: profile.gender,
+            role: profile.username === 'iegik' ? 'admin' : 'player'
+          }, function (err, user) {
+            if (err) {
+              console.error(err);
+              return done(err);
+            } else {
+              done(null, {
+                _id: user._id,
                 accessToken: accessToken,
-                refreshToken: refreshToken
-              }
-            });
-            return done(null, {
-              _id: user._id,
+                refreshToken: refreshToken,
+                username: user.username,
+                fullname: user.fullname,
+                gender: user.gender,
+                role: user.role
+              });
+            }
+          });
+        } else { //add this else
+          db.users.update({
+            _id: user._id
+          }, {
+            $set: {
               accessToken: accessToken,
-              refreshToken: refreshToken,
-              username: user.username,
-              fullname: user.fullname,
-              gender: user.gender,
-              role: user.role
-            });
-          }
-        });
+              refreshToken: refreshToken
+            }
+          });
+          return done(null, {
+            _id: user._id,
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            username: user.username,
+            fullname: user.fullname,
+            gender: user.gender,
+            role: user.role
+          });
+        }
       });
-    }));
-
-  app.use(expressSession({
-    secret: process.env.DINAMO_APP_SECRET || 'dinamo'
+    });
   }));
-  app.use(passport.initialize());
-  app.use(passport.session());
 
-  app.use(function (req, res, next) {
-    /*
+app.use(expressSession({
+  secret: process.env.DINAMO_APP_SECRET || 'dinamo'
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use(function (req, res, next) {
+  /*
     res.Header('Access-Control-Allow-Origin', '*');
     res.Header('Access-Control-Allow-Credentials', true);
     res.Header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
     res.header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type");
     next();
     */
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
 
-    // intercept OPTIONS method
-    if ('OPTIONS' === req.method) {
-      res.send(200);
-    } else {
-      next();
-    }
-  });
-  app.use(methodOverride());
-  app.use(errorHandler({
-    dumpExceptions: true,
-    showStack: true
-  }));
+  // intercept OPTIONS method
+  if ('OPTIONS' === req.method) {
+    res.send(200);
+  } else {
+    next();
+  }
+});
+app.use(methodOverride());
+app.use(errorHandler({
+  dumpExceptions: true,
+  showStack: true
+}));
 
-  function s2() {
-    // s2(game_score, user_rate)
-    // 1. Par iesniegtu prognozi +25
-    //    За внесённый прогноз
-    //    For the submitted prediction
-    // 2. Nav uzminēts rezultāts: -5
-    //    Не угадан результат: -5
-    //    Incorrectly guessed the result
-    var f2 = function (x, y, w, z) {
-        return (x + ' ' + y === w + ' ' + z) ? 0 : -5;
-      }, // Точный результат
-      // 1:0 1:0 -> 0 | 1:0 3:3 -> -5 | 1:1 3:3 -> -5
+function s2() {
+  // s2(game_score, user_rate)
+  // 1. Par iesniegtu prognozi +25
+  //    За внесённый прогноз
+  //    For the submitted prediction
+  // 2. Nav uzminēts rezultāts: -5
+  //    Не угадан результат: -5
+  //    Incorrectly guessed the result
+  var f2 = function (x, y, w, z) {
+      return (x + ' ' + y === w + ' ' + z) ? 0 : -5;
+    }, // Точный результат
+    // 1:0 1:0 -> 0 | 1:0 3:3 -> -5 | 1:1 3:3 -> -5
 
-      // 3. Nepareizi noteikts uzvaretajs vai neizšķirts: -5 ( #># && #># ) || (#?# && #=# )
-      //    Неправильно угадан победитель или ничья: -5
-      //    Incorrectly guessed the result or draw: -5
-      f3 = function (x, y, w, z) {
-        return ((x > y && w > z) || (x < y && w < z)) || !(f2(x, y, w, z) || (x >= y && w > z) || (x < y && w < z)) || (x === y && w === z) ? 0 : -5;
-      }, // Правильный победитель или ничья 
-      // 1:0 3:2 -> 0 | 1:0 2:3 -> -5 | 1:1 3:3 -> -5 | 1:0 3:3 -> -5
+    // 3. Nepareizi noteikts uzvaretajs vai neizšķirts: -5 ( #># && #># ) || (#?# && #=# )
+    //    Неправильно угадан победитель или ничья: -5
+    //    Incorrectly guessed the result or draw: -5
+    f3 = function (x, y, w, z) {
+      return ((x > y && w > z) || (x < y && w < z)) || !(f2(x, y, w, z) || (x >= y && w > z) || (x < y && w < z)) || (x === y && w === z) ? 0 : -5;
+    }, // Правильный победитель или ничья 
+    // 1:0 3:2 -> 0 | 1:0 2:3 -> -5 | 1:1 3:3 -> -5 | 1:0 3:3 -> -5
 
-      // 4. Nepareizi noteikta vārtu starpība: -5
-      //    Неправильно установлена разница мячей: -5
-      //    Improperly installed goal difference: -5
-      //      ,(x>y?x-y:y-x)==(w>z?w-z:z-w)?0:-5 // Разница мячей 
-      f4 = function (x, y, w, z) {
-        return !f2(x, y, w, z) || x - y === w - z ? 0 : -5;
-      }, // Разница мячей
-      // 1:0 3:2 -> 0 | 1:0 3:1 -> -5 | 1:1 3:3 -> 0
+    // 4. Nepareizi noteikta vārtu starpība: -5
+    //    Неправильно установлена разница мячей: -5
+    //    Improperly installed goal difference: -5
+    //      ,(x>y?x-y:y-x)==(w>z?w-z:z-w)?0:-5 // Разница мячей 
+    f4 = function (x, y, w, z) {
+      return !f2(x, y, w, z) || x - y === w - z ? 0 : -5;
+    }, // Разница мячей
+    // 1:0 3:2 -> 0 | 1:0 3:1 -> -5 | 1:1 3:3 -> 0
 
-      // 5. Nepareizi noteikta vārtu starpība (par kātriem vārtiem): -1
-      //    За каждое неверо угаданное очко: -1
-      //    For every wrong guessed point: -1
-      f5 = function (x, y, w, z) {
-        var a = (x - y),
-          b = (w - z);
-        return !f2(x, y, w, z) || !f4(x, y, w, z) ? 0 : -Math.abs(a - b);
-      }, // Разница в счёте
-      // 1:0 3:2 -> 0 | 1:0 1:2 -> -2 | 1:0 3:4 -> -2 | 1:1 3:3 -> 0
-      // Math.abs(x-w)+Math.abs(y-z)
+    // 5. Nepareizi noteikta vārtu starpība (par kātriem vārtiem): -1
+    //    За каждое неверо угаданное очко: -1
+    //    For every wrong guessed point: -1
+    f5 = function (x, y, w, z) {
+      var a = (x - y),
+        b = (w - z);
+      return !f2(x, y, w, z) || !f4(x, y, w, z) ? 0 : -Math.abs(a - b);
+    }, // Разница в счёте
+    // 1:0 3:2 -> 0 | 1:0 1:2 -> -2 | 1:0 3:4 -> -2 | 1:1 3:3 -> 0
+    // Math.abs(x-w)+Math.abs(y-z)
 
-      // 6. Par katru nepareizi noteikta katras komandas gūtu vārtu skaitu
-      //    Для каждого неправильно угаданного количества голов полученных каждой командой
-      //    For every wrong guessed amonut of goals each team received
-      f6 = function (x, y, w, z) {
-        return !f2(x, y, w, z) ? 0 : -(Math.abs(x - w) + Math.abs(y - z));
-      }, // Разница в счёте
-      //       ,((x>y&&w>z)||w==z)?:-Math.abs(Math.abs(x-w)-Math.abs(y-z))
-      // 1:0 3:2 -> -4 | 1:0 1:0 -> 0 | 1:0 1:2 -> -2 | 1:0 3:4 -> -6 | 1:1 3:3 -> -4
-      a,
-      b,
-      x,
-      y,
-      w,
-      z,
-      s = 25;
-    if (arguments[1]) {
-      a = arguments[0].split(':'); // x:y
-      b = arguments[1].split(':'); // w:z
-      x = a[0] * 1;
-      y = a[1] * 1; // x:y
+    // 6. Par katru nepareizi noteikta katras komandas gūtu vārtu skaitu
+    //    Для каждого неправильно угаданного количества голов полученных каждой командой
+    //    For every wrong guessed amonut of goals each team received
+    f6 = function (x, y, w, z) {
+      return !f2(x, y, w, z) ? 0 : -(Math.abs(x - w) + Math.abs(y - z));
+    }, // Разница в счёте
+    //       ,((x>y&&w>z)||w==z)?:-Math.abs(Math.abs(x-w)-Math.abs(y-z))
+    // 1:0 3:2 -> -4 | 1:0 1:0 -> 0 | 1:0 1:2 -> -2 | 1:0 3:4 -> -6 | 1:1 3:3 -> -4
+    a,
+    b,
+    x,
+    y,
+    w,
+    z,
+    s = 25;
+  if (arguments[1]) {
+    a = arguments[0].split(':'); // x:y
+    b = arguments[1].split(':'); // w:z
+    x = a[0] * 1;
+    y = a[1] * 1; // x:y
 
-      w = b[0] * 1;
-      z = b[1] * 1; // w:z
+    w = b[0] * 1;
+    z = b[1] * 1; // w:z
 
       [f2, f3, f4, f5, f6].forEach(function (v) {
-        //console.log(v.name, v(x, y, w, z));
-        return s += v(x, y, w, z);
-      });
-      // 7. Ja ir mazāk, neka 1 punkti: = 0
-      //    Если осталось меньше чем 1 пункт: = 0
-      s = s < 1 ? 0 : s;
-      return s;
-    }
-    return 0;
+      //console.log(v.name, v(x, y, w, z));
+      return s += v(x, y, w, z);
+    });
+    // 7. Ja ir mazāk, neka 1 punkti: = 0
+    //    Если осталось меньше чем 1 пункт: = 0
+    s = s < 1 ? 0 : s;
+    return s;
   }
+  return 0;
+}
 
-  // Redirect the user to Facebook for authentication.  When complete,
-  // Facebook will redirect the user back to the application at
-  //     /auth/facebook/callback
-  app.get('/auth/facebook', passport.authenticate('facebook-canvas'));
+// Redirect the user to Facebook for authentication.  When complete,
+// Facebook will redirect the user back to the application at
+//     /auth/facebook/callback
+app.get('/auth/facebook', passport.authenticate('facebook-canvas'));
 
-  // Facebook will redirect the user to this URL after approval.  Finish the
-  // authentication process by attempting to obtain an access token.  If
-  // access was granted, the user will be logged in.  Otherwise,
-  // authentication has failed.
-  app.get('/auth/facebook/callback',
-    passport.authenticate('facebook-canvas', {
-      successRedirect: '/',
-      failureRedirect: '/login'
-    }));
-  app.post(['/', '/auth/facebook/canvas'],
-    passport.authenticate('facebook-canvas', {
-      successRedirect: '/',
-      failureRedirect: '/auth/facebook/canvas/autologin'
-    }));
-  app.get('/auth/facebook/canvas/autologin', function (req, res) {
-    res.send('<!DOCTYPE html>' +
-      '<body>' +
-      '<script type="text/javascript">' +
-      'top.location.href = "/auth/facebook";' +
-      '</script>' +
-      '</body>' +
-      '</html>');
-  });
-  /*
+// Facebook will redirect the user to this URL after approval.  Finish the
+// authentication process by attempting to obtain an access token.  If
+// access was granted, the user will be logged in.  Otherwise,
+// authentication has failed.
+app.get('/auth/facebook/callback',
+  passport.authenticate('facebook-canvas', {
+    successRedirect: '/',
+    failureRedirect: '/login'
+  }));
+app.post(['/', '/auth/facebook/canvas'],
+  passport.authenticate('facebook-canvas', {
+    successRedirect: '/',
+    failureRedirect: '/auth/facebook/canvas/autologin'
+  }));
+app.get('/auth/facebook/canvas/autologin', function (req, res) {
+  res.send('<!DOCTYPE html>' +
+    '<body>' +
+    '<script type="text/javascript">' +
+    'top.location.href = "/auth/facebook";' +
+    '</script>' +
+    '</body>' +
+    '</html>');
+});
+/*
   app.post('/login', passport.authenticate('local', {
     successRedirect: '/',
     failureRedirect: '/login'
   }));
 */
-  app.get('/login', function (req, res) {
-    return res.send((function () {
-      /*<!DOCTYPE html>
+app.get('/login', function (req, res) {
+  return res.send((function () {
+    /*<!DOCTYPE html>
 <html lang="en" data-ng-app="app">
 
 <head>
@@ -304,32 +300,32 @@ function dinamoapp(options) {
 </body>
 
 </html>*/
-    }).toString().match(/\*([^]*)\*/)[1]);
-  });
+  }).toString().match(/\*([^]*)\*/)[1]);
+});
 
-  apipath === '/api' || app.all('/api', function (req, res) {
-    res.redirect(apipath + '');
-  });
+apipath === '/api' || app.all('/api', function (req, res) {
+  res.redirect(apipath + '');
+});
 
-  // As with any middleware it is quintessential to call next()
-  // if the user is authenticated
-  var isAuthenticated = function (req, res, next) {
-    if (req.isAuthenticated()) {
-      return next();
-    }
-    res.redirect('/login');
-  };
+// As with any middleware it is quintessential to call next()
+// if the user is authenticated
+var isAuthenticated = function (req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/login');
+};
 
-  var isAdmin = function (req, res, next) {
-    if (req.user.role === 'admin') {
-      return next();
-    }
-    res.sendStatus(403);
-  };
+var isAdmin = function (req, res, next) {
+  if (req.user.role === 'admin') {
+    return next();
+  }
+  res.sendStatus(403);
+};
 
-  app.get('/', isAuthenticated, function (req, res) {
-    return res.send((function () {
-      /*
+app.get('/', isAuthenticated, function (req, res) {
+  return res.send((function () {
+    /*
 <!DOCTYPE html>
 <html lang="en" data-ng-app="app">
 
@@ -991,14 +987,14 @@ VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
       });
     }
 */
-    }).toString().match(/\*([^]*)\*/)[1] + 'var user = ' + JSON.stringify(req.user) + '</script></body></html>');
-  });
+  }).toString().match(/\*([^]*)\*/)[1] + 'var user = ' + JSON.stringify(req.user) + '</script></body></html>');
+});
 
 
-  app.get(apipath + '', isAuthenticated, function (req, res) {
-    return res.send(
-      '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"><link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet"/></head><body class="container">' +
-      marked('# Dinamo API v2\n\
+app.get(apipath + '', isAuthenticated, function (req, res) {
+  return res.send(
+    '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"><link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet"/></head><body class="container">' +
+    marked('# Dinamo API v2\n\
 \n\
 |                    | POST                 | GET           | PUT                               | DELETE              \n\
 | ------------------ | -------------------- | ------------- | --------------------------------- | ------------------- \n\
@@ -1007,28 +1003,28 @@ VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
 | ```/api/v2/games/Dinamo%20R%20-%20CSKA/rates``` | create a new rate for the game | list rates of the game | bulk update rates for the game | delete all rates of the game \n\
 | ```/api/v2/games/Dinamo%20R%20-%20CSKA/rates/Ģirts``` | error | show ```Ģirts``` rate | if exists update ```Ģirts``` rate, else error | delete ```Ģirts``` rate \n\
 \n') +
-      '<pre>' + JSON.stringify([{
-        'name': 'Dinamo R - CSKA',
-        'location': 'Arena Riga',
-        'starts': new Date(2000),
-        'ends': null,
-        'rates': [
-          {
-            'name': req.fullname || 'XXXXXXX',
-            'value': 'X:X',
-            'score': 0
+    '<pre>' + JSON.stringify([{
+      'name': 'Dinamo R - CSKA',
+      'location': 'Arena Riga',
+      'starts': new Date(2000),
+      'ends': null,
+      'rates': [
+        {
+          'name': req.fullname || 'XXXXXXX',
+          'value': 'X:X',
+          'score': 0
           }, // 6
   ],
-        'scores': [
-          {
-            'time': new Date(1000),
-            'value': '0:0'
+      'scores': [
+        {
+          'time': new Date(1000),
+          'value': '0:0'
           }
   ]
 }], null, " ") +
-      '</pre>\n' +
-      (function () {
-        /*
+    '</pre>\n' +
+    (function () {
+      /*
 <script>
       // list rates
       var ajax = function (method, url, async, data){
@@ -1080,22 +1076,22 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
       //ajax("DELETE","/api/v2/games/Dinamo R - CSKA/rates/Rolands",  !1, {"name":"Arturs Jansons"});
 </pre>
 */
-      }).toString().match(/\*([^]*)\*/)[1] +
-      '</body></html>');
-  });
+    }).toString().match(/\*([^]*)\*/)[1] +
+    '</body></html>');
+});
 
-  var toRegExpAll = function (items) {
-    var i, v;
-    for (i in items) {
-      v = items[i];
-      items[i] = {
-        $regex: new RegExp(v)
-      };
-    }
-  };
+var toRegExpAll = function (items) {
+  var i, v;
+  for (i in items) {
+    v = items[i];
+    items[i] = {
+      $regex: new RegExp(v)
+    };
+  }
+};
 
-  function RatesModel_NoSQL_v1(db) {
-    /*
+function RatesModel_NoSQL_v1(db) {
+  /*
     db.remove({});
     db.find({},function (err, rates) {
       if(!err && !rates.length === true){
@@ -1110,168 +1106,168 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
     });
     */
 
-    app.get(apipath + '/backup', function (req, res) {
-      console.log("GET:", req.url);
-      return db.find({}, function (err, games) {
-        if (!err) {
-          return res[req.query.callback ? 'jsonp' : 'send'](games);
-        } else {
-          return console.log(err);
-        }
-      });
+  app.get(apipath + '/backup', function (req, res) {
+    console.log("GET:", req.url);
+    return db.find({}, function (err, games) {
+      if (!err) {
+        return res[req.query.callback ? 'jsonp' : 'send'](games);
+      } else {
+        return console.log(err);
+      }
     });
+  });
 
-    app.post(apipath + '/games', [isAuthenticated, isAdmin, jsonParser], function (req, res) {
-      console.log("POST:", req.url); //, req.body);
+  app.post(apipath + '/games', [isAuthenticated, isAdmin, jsonParser], function (req, res) {
+    console.log("POST:", req.url); //, req.body);
 
-      if (!req.body) return res.sendStatus(400);
+    if (!req.body) return res.sendStatus(400);
 
-      return db.insert(req.body, function (err) {
-        if (!err) {
-          console.log("created");
-          return res[req.query.callback ? 'jsonp' : 'send'](req.body);
-        } else {
-          return console.log(err);
-        }
-      });
+    return db.insert(req.body, function (err) {
+      if (!err) {
+        console.log("created");
+        return res[req.query.callback ? 'jsonp' : 'send'](req.body);
+      } else {
+        return console.log(err);
+      }
     });
+  });
 
-    app.get(apipath + '/games', function (req, res) {
-      console.log("GET:", req.url);
-      return db.find({}).sort({
-        starts: 1
-      }).exec(function (err, games) {
-        var x, y, scores, rates;
+  app.get(apipath + '/games', function (req, res) {
+    console.log("GET:", req.url);
+    return db.find({}).sort({
+      starts: 1
+    }).exec(function (err, games) {
+      var x, y, scores, rates;
 
-        function sortScoreDesc(a, b) {
-          return b.score - a.score;
-        }
+      function sortScoreDesc(a, b) {
+        return b.score - a.score;
+      }
 
-        if (!err) {
-          for (x in games) {
-            scores = games[x].scores;
-            rates = games[x].rates;
-            if (scores && (!!scores.length || ({}).toString.call(scores) === '[object Object]') && true) {
-              if (({}).toString.call(rates) === '[object Object]') {
-                games[x].score = scores.value;
-              } else {
-                games[x].score = scores[scores.length - 1].value;
-              }
+      if (!err) {
+        for (x in games) {
+          scores = games[x].scores;
+          rates = games[x].rates;
+          if (scores && (!!scores.length || ({}).toString.call(scores) === '[object Object]') && true) {
+            if (({}).toString.call(rates) === '[object Object]') {
+              games[x].score = scores.value;
+            } else {
+              games[x].score = scores[scores.length - 1].value;
             }
+          }
 
-            if (!!rates && (!!rates.length || ({}).toString.call(rates) === '[object Object]') && true) {
-              if (({}).toString.call(rates) === '[object Object]') {
-                if (new Date(games[x].starts) > new Date()) {
-                  games[x].rates.value = '***';
+          if (!!rates && (!!rates.length || ({}).toString.call(rates) === '[object Object]') && true) {
+            if (({}).toString.call(rates) === '[object Object]') {
+              if (new Date(games[x].starts) > new Date()) {
+                games[x].rates.value = '***';
+              }
+            } else {
+              if (new Date(games[x].starts) > new Date()) {
+                for (y in rates) {
+                  games[x].rates[y].value = '***';
                 }
               } else {
-                if (new Date(games[x].starts) > new Date()) {
-                  for (y in rates) {
-                    games[x].rates[y].value = '***';
-                  }
-                } else {
-                  games[x].rates.sort(sortScoreDesc);
-                }
+                games[x].rates.sort(sortScoreDesc);
               }
             }
           }
-          return res[req.query.callback ? 'jsonp' : 'send'](games);
-        } else {
-          return console.log(err);
         }
-      });
-    });
-
-    app.get(apipath + '/games/:name', function (req, res) {
-      console.log("GET:", req.url);
-      return db.find({
-        name: {
-          $regex: new RegExp(req.params.name)
-        }
-      }, function (err, game) {
-        if (!err) {
-          return res[req.query.callback ? 'jsonp' : 'send'](game);
-        } else {
-          return console.log(err);
-        }
-      });
-    });
-
-
-    app.put(apipath + '/games', [isAuthenticated, jsonParser], function (req, res) {
-      console.log("PUT:", req.url, req.body);
-      return db.update({}, {
-        $set: req.body
-      }, {
-        multi: true
-      }, function (err, numReplaced) {
-        if (!err) {
-          console.log("updated " + numReplaced + " rate(s)");
-          return res[req.query.callback ? 'jsonp' : 'send'](Object(numReplaced));
-        } else {
-          console.log(err);
-        }
-      });
-    });
-
-    app.put(apipath + '/games/:name', [isAuthenticated, isAdmin, jsonParser], function (req, res) {
-      console.log("PUT:", req.url, req.body);
-      return db.update({
-        'name': req.params.name
-      }, {
-        $set: req.body
-      }, {}, function (err, numReplaced) {
-        if (!err) {
-          console.log("updated " + numReplaced + " rate(s)");
-          return res[req.query.callback ? 'jsonp' : 'send'](Object(numReplaced));
-        } else {
-          console.log(err);
-        }
-      });
-    });
-
-    app.delete(apipath + '/games', [isAuthenticated, isAdmin, jsonParser], function (req, res) {
-      console.log("DELETE:", req.url, req.body);
-
-      var games = {};
-
-      if (!req.body) return res.sendStatus(400);
-
-      if (({}).toString.call(req.body) == "[object Array]") {
-        req.body.forEach(toRegExpAll);
+        return res[req.query.callback ? 'jsonp' : 'send'](games);
       } else {
-        toRegExpAll(req.body);
+        return console.log(err);
       }
+    });
+  });
 
-      return db.remove(games, {
-        multi: true
-      }, function (err, numRemoved) {
-        if (!err) {
-          console.log("removed " + numRemoved + " rate(s)");
+  app.get(apipath + '/games/:name', function (req, res) {
+    console.log("GET:", req.url);
+    return db.find({
+      name: {
+        $regex: new RegExp(req.params.name)
+      }
+    }, function (err, game) {
+      if (!err) {
+        return res[req.query.callback ? 'jsonp' : 'send'](game);
+      } else {
+        return console.log(err);
+      }
+    });
+  });
 
-          res[req.query.callback ? 'jsonp' : 'send'](Object(numRemoved));
-        } else {
-          console.log(err);
-        }
-      });
 
+  app.put(apipath + '/games', [isAuthenticated, jsonParser], function (req, res) {
+    console.log("PUT:", req.url, req.body);
+    return db.update({}, {
+      $set: req.body
+    }, {
+      multi: true
+    }, function (err, numReplaced) {
+      if (!err) {
+        console.log("updated " + numReplaced + " rate(s)");
+        return res[req.query.callback ? 'jsonp' : 'send'](Object(numReplaced));
+      } else {
+        console.log(err);
+      }
+    });
+  });
+
+  app.put(apipath + '/games/:name', [isAuthenticated, isAdmin, jsonParser], function (req, res) {
+    console.log("PUT:", req.url, req.body);
+    return db.update({
+      'name': req.params.name
+    }, {
+      $set: req.body
+    }, {}, function (err, numReplaced) {
+      if (!err) {
+        console.log("updated " + numReplaced + " rate(s)");
+        return res[req.query.callback ? 'jsonp' : 'send'](Object(numReplaced));
+      } else {
+        console.log(err);
+      }
+    });
+  });
+
+  app.delete(apipath + '/games', [isAuthenticated, isAdmin, jsonParser], function (req, res) {
+    console.log("DELETE:", req.url, req.body);
+
+    var games = {};
+
+    if (!req.body) return res.sendStatus(400);
+
+    if (({}).toString.call(req.body) == "[object Array]") {
+      req.body.forEach(toRegExpAll);
+    } else {
+      toRegExpAll(req.body);
+    }
+
+    return db.remove(games, {
+      multi: true
+    }, function (err, numRemoved) {
+      if (!err) {
+        console.log("removed " + numRemoved + " rate(s)");
+
+        res[req.query.callback ? 'jsonp' : 'send'](Object(numRemoved));
+      } else {
+        console.log(err);
+      }
     });
 
-    app.delete(apipath + '/games/:name', [isAuthenticated, isAdmin, jsonParser], function (req, res) {
-      console.log("DELETE:", req.url);
-      return db.remove({
-        'name': req.params.name
-      }, {}, function (err, numRemoved) {
-        if (!err) {
-          console.log("removed " + numRemoved + " rate(s)");
-          return res[req.query.callback ? 'jsonp' : 'send'](Object(numRemoved));
-        } else {
-          console.log(err);
-        }
-      });
-    });
+  });
 
-    /*
+  app.delete(apipath + '/games/:name', [isAuthenticated, isAdmin, jsonParser], function (req, res) {
+    console.log("DELETE:", req.url);
+    return db.remove({
+      'name': req.params.name
+    }, {}, function (err, numRemoved) {
+      if (!err) {
+        console.log("removed " + numRemoved + " rate(s)");
+        return res[req.query.callback ? 'jsonp' : 'send'](Object(numRemoved));
+      } else {
+        console.log(err);
+      }
+    });
+  });
+
+  /*
     db.remove({});
     db.find({},function (err, rates) {
       if(!err && !rates.length === true){
@@ -1351,133 +1347,133 @@ ajax("GET",   "/api/v2/games/Dinamo R - Dinamo Mn/rates",  !1);
     });
     */
 
-    app.get(apipath + '/games/:name/rates', function (req, res) {
-      console.log("GET:", req.url, req.params.name);
+  app.get(apipath + '/games/:name/rates', function (req, res) {
+    console.log("GET:", req.url, req.params.name);
 
-      return db.findOne({
-        'name': req.params.name
-      }, {
-        name: 1,
-        rates: 1
-      }, function (err, game) {
-        console.log("game found", game);
-        if (!game) return res.sendStatus(400);
+    return db.findOne({
+      'name': req.params.name
+    }, {
+      name: 1,
+      rates: 1
+    }, function (err, game) {
+      console.log("game found", game);
+      if (!game) return res.sendStatus(400);
 
-        if (!err) {
-          //return res[req.query.callback?'jsonp':'send'](game.rates.filter(function (score) {return score.name = ;}));
-          return res[req.query.callback ? 'jsonp' : 'send'](game);
-        } else {
-          return console.log(err);
-        }
-      });
+      if (!err) {
+        //return res[req.query.callback?'jsonp':'send'](game.rates.filter(function (score) {return score.name = ;}));
+        return res[req.query.callback ? 'jsonp' : 'send'](game);
+      } else {
+        return console.log(err);
+      }
     });
+  });
 
-    app.get(apipath + '/games/:name/rates/:username', function (req, res) {
-      console.log("GET:", req.url, req.params.name);
+  app.get(apipath + '/games/:name/rates/:username', function (req, res) {
+    console.log("GET:", req.url, req.params.name);
 
-      return db.findOne({
-        'name': req.params.name,
-        'rates.name': req.params.username
-      }, {
-        name: 1,
-        rates: 1
-      }, function (err, game) {
-        console.log("game found", game);
-        if (!game) return res.sendStatus(400);
+    return db.findOne({
+      'name': req.params.name,
+      'rates.name': req.params.username
+    }, {
+      name: 1,
+      rates: 1
+    }, function (err, game) {
+      console.log("game found", game);
+      if (!game) return res.sendStatus(400);
 
-        game.rates = game.rates ? game.rates.filter(function (rates) {
-          return rates.name == req.params.username;
-        }) : new Array(null);
+      game.rates = game.rates ? game.rates.filter(function (rates) {
+        return rates.name == req.params.username;
+      }) : new Array(null);
 
-        if (!err) {
-          return res[req.query.callback ? 'jsonp' : 'send'](game);
-        } else {
-          return console.log(err);
-        }
-      });
+      if (!err) {
+        return res[req.query.callback ? 'jsonp' : 'send'](game);
+      } else {
+        return console.log(err);
+      }
     });
+  });
 
 
-    app.put(apipath + '/games/:name/rates', [isAuthenticated, jsonParser], function (req, res) {
-      console.log("PUT:", req.url, req.body, req.user.fullname);
-      if (!req.body && !req.body.name && true) return res.sendStatus(400);
-      var gamename = req.params.name,
-        username = req.user.fullname, // || req.body.name,
-        userrate = req.body.value,
-        now = (new Date()).toJSON();
-      db.update({
-        name: gamename,
-        "rates.name": {
-          $ne: username
-        },
-        starts: {
-          $gt: now
+  app.put(apipath + '/games/:name/rates', [isAuthenticated, jsonParser], function (req, res) {
+    console.log("PUT:", req.url, req.body, req.user.fullname);
+    if (!req.body && !req.body.name && true) return res.sendStatus(400);
+    var gamename = req.params.name,
+      username = req.user.fullname, // || req.body.name,
+      userrate = req.body.value,
+      now = (new Date()).toJSON();
+    db.update({
+      name: gamename,
+      "rates.name": {
+        $ne: username
+      },
+      starts: {
+        $gt: now
+      }
+    }, {
+      $addToSet: {
+        rates: {
+          date: now,
+          name: username,
+          value: userrate
         }
-      }, {
-        $addToSet: {
-          rates: {
-            date: now,
-            name: username,
-            value: userrate
+      }
+    }, {}, function (err, numReplaced) {
+      if (!err) {
+        console.log("updated " + numReplaced + " rate(s)");
+        return res[req.query.callback ? 'jsonp' : 'send'](Object(numReplaced));
+      } else {
+        console.log(err);
+      }
+    });
+  });
+
+  app.put(apipath + '/games/:name/scores', [isAuthenticated, jsonParser], function (req, res) {
+    console.log("PUT:", req.url, req.body);
+    if (!req.body && !req.body.name && true) {
+      return res.sendStatus(400);
+    }
+    var gamename = req.params.name,
+      scorevalue = req.body.value;
+    db.findOne({
+      name: gamename,
+      "scores.value": {
+        $ne: scorevalue
+      }
+    }, {
+      rates: 1
+    }, function (err, game) {
+      if (!err && game && true) {
+        var i, rates = game.rates;
+        for (i in rates) {
+          rates[i].score = s2(scorevalue, rates[i].value);
+        }
+        db.update({
+          name: gamename,
+          "scores.value": {
+            $ne: scorevalue
           }
-        }
-      }, {}, function (err, numReplaced) {
-        if (!err) {
-          console.log("updated " + numReplaced + " rate(s)");
-          return res[req.query.callback ? 'jsonp' : 'send'](Object(numReplaced));
-        } else {
-          console.log(err);
-        }
-      });
-    });
-
-    app.put(apipath + '/games/:name/scores', [isAuthenticated, jsonParser], function (req, res) {
-      console.log("PUT:", req.url, req.body);
-      if (!req.body && !req.body.name && true) {
+        }, {
+          $push: {
+            scores: {
+              date: (new Date()).toJSON(),
+              value: scorevalue
+            }
+          }
+        }, {}, function (err, numReplaced) {
+          if (!err) {
+            console.log("updated " + numReplaced + " rate(s)");
+            return res[req.query.callback ? 'jsonp' : 'send'](Object(numReplaced));
+          } else {
+            console.log(err);
+          }
+        });
+      } else {
         return res.sendStatus(400);
       }
-      var gamename = req.params.name,
-        scorevalue = req.body.value;
-      db.findOne({
-        name: gamename,
-        "scores.value": {
-          $ne: scorevalue
-        }
-      }, {
-        rates: 1
-      }, function (err, game) {
-        if (!err && game && true) {
-          var i, rates = game.rates;
-          for (i in rates) {
-            rates[i].score = s2(scorevalue, rates[i].value);
-          }
-          db.update({
-            name: gamename,
-            "scores.value": {
-              $ne: scorevalue
-            }
-          }, {
-            $push: {
-              scores: {
-                date: (new Date()).toJSON(),
-                value: scorevalue
-              }
-            }
-          }, {}, function (err, numReplaced) {
-            if (!err) {
-              console.log("updated " + numReplaced + " rate(s)");
-              return res[req.query.callback ? 'jsonp' : 'send'](Object(numReplaced));
-            } else {
-              console.log(err);
-            }
-          });
-        } else {
-          return res.sendStatus(400);
-        }
-      });
     });
+  });
 
-    /*
+  /*
 app.put(apipath + '/games/:name/rates/:username', jsonParser, function (req, res) {
   console.log("PUT:", req.url, req.body);
   if (!req.body) return res.sendStatus(400)
@@ -1579,56 +1575,49 @@ return db.remove({}, function (err, numRemoved) {
 });
 */
 
-  }
-  new RatesModel_NoSQL_v1(db.rates);
-
-  var RatesModel_SQL_v1 = function (err, client, done) {
-    if (!err) {
-      app.post(apipath + '/games', jsonParser, function (req, res) {
-        console.log("POST:", req.url, req.body);
-
-        if (!req.body) return res.sendStatus(400);
-
-        return client.query('INSERT INTO "dB".rates SELECT * FROM json_populate_record( NULL::"dB".rates, ' + req.body + ' )', function (err) {
-          if (!err) {
-            console.log("created");
-            return res[req.query.callback ? 'jsonp' : 'send'](req.body);
-          } else {
-            return console.log(err);
-          }
-        });
-      });
-
-      app.get(apipath + '/games', jsonParser, function (req, res) {
-        console.log("POST:", req.url, req.body);
-
-        if (!req.body) return res.sendStatus(400);
-
-        return client.query('SELECT * FROM "dB".rates', function (err, result) {
-          if (!err) {
-            console.log("created");
-            return res[req.query.callback ? 'jsonp' : 'send'](result);
-          } else {
-            console.error(err);
-            return res.sendStatus(400);
-          }
-        });
-      });
-
-    } else {
-      console.warn("Postgres SQL is not supported:", err);
-    }
-  };
-
-  //DatastoreSQL.connect(process.env.DATABASE_URL, RatesModel_SQL_v1);
-
-  return app;
 }
+new RatesModel_NoSQL_v1(db.rates);
 
-dinamoapp().listen(process.env.PORT || 5000, function () {
-  console.log("Server is listening on..." + (process.env.PORT || 5000));
-});
-/*
+var RatesModel_SQL_v1 = function (err, client, done) {
+  if (!err) {
+    app.post(apipath + '/games', jsonParser, function (req, res) {
+      console.log("POST:", req.url, req.body);
+
+      if (!req.body) return res.sendStatus(400);
+
+      return client.query('INSERT INTO "dB".rates SELECT * FROM json_populate_record( NULL::"dB".rates, ' + req.body + ' )', function (err) {
+        if (!err) {
+          console.log("created");
+          return res[req.query.callback ? 'jsonp' : 'send'](req.body);
+        } else {
+          return console.log(err);
+        }
+      });
+    });
+
+    app.get(apipath + '/games', jsonParser, function (req, res) {
+      console.log("POST:", req.url, req.body);
+
+      if (!req.body) return res.sendStatus(400);
+
+      return client.query('SELECT * FROM "dB".rates', function (err, result) {
+        if (!err) {
+          console.log("created");
+          return res[req.query.callback ? 'jsonp' : 'send'](result);
+        } else {
+          console.error(err);
+          return res.sendStatus(400);
+        }
+      });
+    });
+
+  } else {
+    console.warn("Postgres SQL is not supported:", err);
+  }
+};
+
+//DatastoreSQL.connect(process.env.DATABASE_URL, RatesModel_SQL_v1);
+
 //create node.js http server and listen on port
 http.createServer(app).listen(process.env.PORT || 5000, function () {
   console.log("Server is listening on..." + (process.env.PORT || 5000));
@@ -1636,4 +1625,4 @@ http.createServer(app).listen(process.env.PORT || 5000, function () {
 
 https.createServer(certificate, app).listen(process.env.PORT_SSL || 5001, function () {
   console.log("Server is listening on..." + (process.env.PORT_SSL || 5001));
-});*/
+});
