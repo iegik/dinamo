@@ -1,7 +1,7 @@
 /*global angular, competitions, bets, $scope, require, __dirname, console, process */
 /*jslint white: false */
 /*jshint multistr: true */
-function dinamoapp() {
+function dinamoapp(options) {
   'use strict'
   var Express = require("express"),
     //fs = require('fs'),
