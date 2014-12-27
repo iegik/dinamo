@@ -248,7 +248,7 @@ function dinamoapp(options) {
       successRedirect: '/',
       failureRedirect: '/login'
     }));
-  app.post('/auth/facebook/canvas',
+  app.post(['/', '/auth/facebook/canvas'],
     passport.authenticate('facebook-canvas', {
       successRedirect: '/',
       failureRedirect: '/auth/facebook/canvas/autologin'
@@ -257,7 +257,7 @@ function dinamoapp(options) {
     res.send('<!DOCTYPE html>' +
       '<body>' +
       '<script type="text/javascript">' +
-      'top.location.href = "/";' +
+      'top.location.href = "/auth/facebook";' +
       '</script>' +
       '</body>' +
       '</html>');
