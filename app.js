@@ -253,11 +253,11 @@ function dinamoapp(options) {
       successRedirect: '/',
       failureRedirect: '/auth/facebook/canvas/autologin'
     }));
-  app.get('/auth/facebook/canvas/autologin', function (req, res) {
+  app.get('/auth/facebook/canvas/autologin', isAuthenticated, function (req, res) {
     res.send('<!DOCTYPE html>' +
       '<body>' +
       '<script type="text/javascript">' +
-      'top.location.href = "/auth/facebook";' +
+      'top.location.href = "/";' +
       '</script>' +
       '</body>' +
       '</html>');
