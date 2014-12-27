@@ -25,8 +25,8 @@ function dinamoapp(options) {
     // parse application/json
     jsonParser = bodyParser.json(),
     app = new Express(),
-    basepath = (options.dbpath || __dirname),
-    apipath = options.apipath || '/api',
+    basepath = (options && options.dbpath || __dirname),
+    apipath = options && options.apipath || '/api',
     db = {
       "rates": new DatastoreNoSQL({
         filename: basepath + '/rates.db',
