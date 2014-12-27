@@ -59,7 +59,7 @@ function dinamoapp(options) {
   passport.use(new FacebookStrategy({
       clientID: process.env.FACEBOOK_APP_ID || '705103909550016',
       clientSecret: process.env.FACEBOOK_APP_SECRET || '2b985e4f4e03a628d6c111178b444428',
-      callbackURL: "http://" + (process.env.DOMAIN || 'localhost:5000') + "/auth/facebook/callback"
+      callbackURL: "https://" + (process.env.DOMAIN || 'localhost:5000') + "/auth/facebook/callback"
     },
     function (accessToken, refreshToken, profile, done) {
       // asynchronous verification, for effect...
