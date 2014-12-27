@@ -1,10 +1,12 @@
 /*global angular, competitions, bets, $scope, require, __dirname, console, process */
 /*jslint white: false */
 /*jshint multistr: true */
-
-function dinamo_api_v2(options) {
-  'use strict';
+function dinamoapp() {
+  'use strict'
   var Express = require("express"),
+    //fs = require('fs'),
+    //http = require('http'),
+    //https = require('https'),
     DatastoreNoSQL = require('nedb'),
     DatastoreSQL = require('pg'),
     marked = require('marked'),
@@ -13,7 +15,7 @@ function dinamo_api_v2(options) {
     methodOverride = require('method-override'),
     errorHandler = require('errorhandler'),
     passport = require('passport'),
-    FacebookStrategy = require('passport-facebook').Strategy,
+    FacebookStrategy = require('passport-facebook-canvas').Strategy,
     expressSession = require('express-session'),
 
     // parse application/x-www-form-urlencoded
@@ -34,6 +36,10 @@ function dinamo_api_v2(options) {
         filename: basepath + '/users.db',
         autoload: true
       })
+    },
+    certificate = {
+      key: fs.readFileSync(path.resolve(__dirname, './self_signed_ssl.key'), 'utf8'),
+      cert: fs.readFileSync(path.resolve(__dirname, './self_signed_ssl.crt'), 'utf8')
     };
 
   passport.serializeUser(function (user, done) {
@@ -229,17 +235,31 @@ function dinamo_api_v2(options) {
   // Redirect the user to Facebook for authentication.  When complete,
   // Facebook will redirect the user back to the application at
   //     /auth/facebook/callback
-  app.get('/auth/facebook', passport.authenticate('facebook'));
+  app.get('/auth/facebook', passport.authenticate('facebook-canvas'));
 
   // Facebook will redirect the user to this URL after approval.  Finish the
   // authentication process by attempting to obtain an access token.  If
   // access was granted, the user will be logged in.  Otherwise,
   // authentication has failed.
   app.get('/auth/facebook/callback',
-    passport.authenticate('facebook', {
+    passport.authenticate('facebook-canvas', {
       successRedirect: '/',
       failureRedirect: '/login'
     }));
+  app.post('/auth/facebook/canvas',
+    passport.authenticate('facebook-canvas', {
+      successRedirect: '/',
+      failureRedirect: '/auth/facebook/canvas/autologin'
+    }));
+  app.get('/auth/facebook/canvas/autologin', function (req, res) {
+    res.send('<!DOCTYPE html>' +
+      '<body>' +
+      '<script type="text/javascript">' +
+      'top.location.href = "/auth/facebook";' +
+      '</script>' +
+      '</body>' +
+      '</html>');
+  });
   /*
   app.post('/login', passport.authenticate('local', {
     successRedirect: '/',
@@ -1603,9 +1623,15 @@ return db.remove({}, function (err, numRemoved) {
   return app;
 }
 
-//create node.js http server and listen on port
-dinamo_api_v2({
-  'dbpath': './'
-}).listen(process.env.PORT || 5000, function () {
+dinamoapp().listen(process.env.PORT || 5000, function () {
   console.log("Server is listening on..." + (process.env.PORT || 5000));
 });
+/*
+//create node.js http server and listen on port
+http.createServer(app).listen(process.env.PORT || 5000, function () {
+  console.log("Server is listening on..." + (process.env.PORT || 5000));
+});
+
+https.createServer(certificate, app).listen(process.env.PORT_SSL || 5001, function () {
+  console.log("Server is listening on..." + (process.env.PORT_SSL || 5001));
+});*/
