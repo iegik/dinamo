@@ -1,0 +1,53 @@
+html {
+  background: #761c23;
+  background-image: radial-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
+  background-position: 50% 0;
+  background-size: 200%;
+  min-height: 840px;
+  height: 100%;
+}
+body {
+  background-color: transparent;
+}
+.list-group-item {
+  background-color: transparent;
+}
+.list-group {
+  position: relative;
+  z-index: 1;
+}
+.list-group::before {
+  content: '\00a0';
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+.list-group::before {
+  background-color: rgba(255, 255, 255, .5);
+}
+#videobg {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  min-width: 164%;
+  min-height: 164%;
+  margin: -32%;
+  width: auto;
+  height: auto;
+  z-index: -1;
+}
+.page-header {
+  text-transform: uppercase;
+  font-family: 'Trebuchet MS', Helvetica, sans-serif;
+  color: #f1f1f1;
+}
+.profile-img {
+  border-radius: 100%;
+  padding: 2em;
+}
+.account-wall {
+  background: rgba(128, 128, 128, .1);
+  border-radius: 6px;
+  padding: 2em;
+}
