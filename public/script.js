@@ -40,7 +40,7 @@ var api = '/api';
       $http.delete(api + '/matches/'+id).success(function (err) {});
     }
     $scope.isAdmin = function(){
-      return !!$scope.user.roles.admin;
+      return ($scope.user.roles).indexOf('admin') >= 0;
     }
 
     $scope.init = $scope.getUser();

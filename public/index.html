@@ -510,12 +510,12 @@ VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
           <button type="submit" class="btn btn-primary">Add</button>
         </form>
 
-        <form class="form-inline" role="form" data-ng-submit="removeGame(game._id);" data-ng-show="user.roles.indexOf('1')+1">
+        <form class="form-inline" role="form" data-ng-submit="removeGame(game._id);" data-ng-show="isAdmin()">
           <button type="submit" class="btn btn-danger" >Delete</button>
         </form>
 
       </div>
-      <div class="list-group-item" data-ng-show="isAdmin">
+      <div class="list-group-item" data-ng-show="isAdmin()">
         <form class="form" role="form" data-ng-submit="addGame(game);">
           Game
           <div class="form-group">
