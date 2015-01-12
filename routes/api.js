@@ -129,10 +129,25 @@ User.register(router, '/users');
 Match.methods(['get', 'put', 'post', 'delete']);
 // Policy
 Match.before('get', isAuthenticated)
-  .before('post', [isAuthenticated, isAuthorized || isAdmin])
-  .before('put', [isAuthenticated, isAuthorized || isAdmin])
-  .before('delete', [isAuthenticated, isAdmin]);
-Match.after('get', (isAuthenticated || isAdmin) || function(req,res,next){
+  .before('post', function(){
+    if(!isAuthorized && !isAdmin){
+      return res.sendStatus(403);
+    }
+  })
+  .before('put', function(){
+    if(!isAuthorized && !isAdmin){
+      return res.sendStatus(403);
+    }
+  })
+  .before('delete', function(){
+    if(!isAuthenticated && !isAdmin){
+      return res.sendStatus(403);
+    }
+  });
+Match.after('get', function(req,res,next){
+  if(!isAuthenticated && !isAdmin){
+    return res.sendStatus(403);
+  }
   // Secure User Information
   var x,y,z,match, select = function (arr, obj){
     var x,out = ({});
