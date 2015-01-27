@@ -32,6 +32,7 @@ var api = '/api';
       });
     };
     $scope.addGame = function () {
+      $window.console.log($scope.game);
       $http.post(api + '/matches', $scope.game).success(function (err) {
         $scope.game = {};
       });
@@ -40,7 +41,7 @@ var api = '/api';
       $http.delete(api + '/matches/' + id).success(function (err) {});
     }
     $scope.isAdmin = function () {
-      return !!($scope.user.roles).indexOf('admin') >= 0;
+      return !!$scope.user.roles && $scope.user.roles.indexOf('admin') >= 0;
     }
 
     $scope.init = $scope.getUser();
