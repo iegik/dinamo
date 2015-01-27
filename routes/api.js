@@ -23,7 +23,7 @@ var express = require('express'),
   },
 
   isAdmin = function (req, res, next) {
-    if (req.user.roles.indexOf('admin') + 1) {
+    if ((req.user.roles).indexOf('admin') + 1) {
       return next();
     }
     res.sendStatus(403);

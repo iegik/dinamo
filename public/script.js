@@ -31,16 +31,16 @@ var api = '/api';
         $scope.getGames();
       });
     };
-    $scope.addGame = function(){
+    $scope.addGame = function () {
       $http.post(api + '/matches', $scope.game).success(function (err) {
         $scope.game = {};
       });
     }
-    $scope.removeGame = function(id){
-      $http.delete(api + '/matches/'+id).success(function (err) {});
+    $scope.removeGame = function (id) {
+      $http.delete(api + '/matches/' + id).success(function (err) {});
     }
-    $scope.isAdmin = function(){
-      return ($scope.user.roles).indexOf('admin') >= 0;
+    $scope.isAdmin = function () {
+      return !!($scope.user.roles).indexOf('admin') >= 0;
     }
 
     $scope.init = $scope.getUser();
