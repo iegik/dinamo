@@ -2,17 +2,17 @@
 <html lang="en" data-ng-app="app">
 
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-  <link type="text/css" href="style.css" rel="stylesheet" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link type="text/css" href="style.css" rel="stylesheet" />
 </head>
 
 <body style="overflow-x: hidden;">
-  <div class="container" data-ng-controller="GameController">
-    <header class="page-header navbar navbar-static-top bs-docs-nav">
-      <h1><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAM8AAACYCAYAAABDCr0QAAAAGXRFWHRTb2Z0d2Fy
+    <div class="container" data-ng-controller="GameController">
+        <header class="page-header navbar navbar-static-top bs-docs-nav">
+            <h1><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAM8AAACYCAYAAABDCr0QAAAAGXRFWHRTb2Z0d2Fy
 ZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2RpVFh0WE1MOmNvbS5hZG9iZS54bXAA
 AAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5U
 Y3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6
@@ -448,113 +448,113 @@ kW2KerY6umjMvaPNZz/8sG7r6NFjhsj5yinymBAOYwie37Mt1FYAMXjw4GsACWDp
 CsETUmk7yAAEsACaJUuWLrKA00kFbJEIKXQYhORQUgRbBscAOWr54RCF4AkpOoCO
 VcVB1XwXOOE2gQOE/r8AAwCvfaC+ERfLTAAAAABJRU5ErkJggg==
 " style="float:left; height: 2em; padding: 0 .5em 0 0" />Dinamo Riga</br><small>Game rates</small></h1>
-    </header>
-    <div class="list-group" data-ng-show="user._id">
-      <div class="list-group-item" data-ng-repeat="game in games" data-ng-controller="RateController">
-        <h3>{{game.vs}}<em class="pull-right badge">{{game.score}}</em></h3>
-        <p>
-          <i class="glyphicon glyphicon-calendar"></i>
-          <em ng-show="game.starts">{{game.starts | date:'EEE, MMM d, HH:mm'}}</em>
-          <em ng-show="game.ends">- {{game.ends | date:'HH:mm'}}</em>
-          <em ng-show="game.location_name" class="pull-right">{{game.location_name}}</em>
-        </p>
+        </header>
+        <div class="list-group" data-ng-show="user._id">
+            <div class="list-group-item" data-ng-repeat="game in games" data-ng-controller="RateController">
+                <h3>{{game.vs}}<em class="pull-right badge">{{game.score}}</em></h3>
+                <p>
+                    <i class="glyphicon glyphicon-calendar"></i>
+                    <em ng-show="game.starts">{{game.starts | date:'EEE, MMM d, HH:mm'}}</em>
+                    <em ng-show="game.ends">- {{game.ends | date:'HH:mm'}}</em>
+                    <em ng-show="game.location_name" class="pull-right">{{game.location_name}}</em>
+                </p>
 
-        <div class="panel panel-default" ng-show="game.rates">
-          <!-- Default panel contents -->
-          <div class="panel-heading">Rates</div>
+                <div class="panel panel-default" ng-show="game.rates">
+                    <!-- Default panel contents -->
+                    <div class="panel-heading">Rates</div>
 
-          <!-- Table -->
-          <table class="table">
-            <tr>
-              <tr>
-                <th style="width:10em">Date</th>
-                <th>Name</th>
-                <th style="width:3em">Rate</th>
-                <th style="width:3em">Score</th>
-              </tr>
-              <tr ng-show="game.rates.length" ng-repeat="rate in game.rates">
-                <td>{{rate.date | date:'EEE, MMM d, HH:mm'}}</td>
-                <td>{{rate.user.displayName}}</td>
-                <td>{{rate.value}}</td>
-                <td>{{rate.score}}</td>
-              </tr>
-              <tr ng-hide="game.rates.length">
-                <td>{{game.rates.date | date:'EEE, MMM d, HH:mm'}}</td>
-                <td>{{game.rates.user.displayName}}</td>
-                <td>{{game.rates.value}}</td>
-                <td>{{game.rates.score}}</td>
-              </tr>
-            </tr>
-          </table>
-        </div>
+                    <!-- Table -->
+                    <table class="table">
+                        <tr>
+                            <tr>
+                                <th style="width:10em">Date</th>
+                                <th>Name</th>
+                                <th style="width:3em">Rate</th>
+                                <th style="width:3em">Score</th>
+                            </tr>
+                            <tr ng-show="game.rates.length" ng-repeat="rate in game.rates">
+                                <td>{{rate.date | date:'EEE, MMM d, HH:mm'}}</td>
+                                <td>{{rate.user.displayName}}</td>
+                                <td>{{rate.value}}</td>
+                                <td>{{rate.score}}</td>
+                            </tr>
+                            <tr ng-hide="game.rates.length">
+                                <td>{{game.rates.date | date:'EEE, MMM d, HH:mm'}}</td>
+                                <td>{{game.rates.user.displayName}}</td>
+                                <td>{{game.rates.value}}</td>
+                                <td>{{game.rates.score}}</td>
+                            </tr>
+                        </tr>
+                    </table>
+                </div>
 
-        <form class="form-inline" role="form" data-ng-submit="addRate(game);" data-ng-show="isBefore(game.starts)">
-          <!--div class="form-group">
+                <form class="form-inline" role="form" data-ng-submit="addRate(game);" data-ng-show="isBefore(game.starts)">
+                    <!--div class="form-group">
             <div class="input-group">
               <label class="sr-only" for="game-{{game._id}}-rate-name">Name</label>
               <input class="form-control" id="game-{{game._id}}-rate-name" placeholder="Name" data-ng-model="rate.name" />
             </div>
           </div-->
-          <div class="form-group">
-            <label class="sr-only" for="game-{{game._id}}-rate-value">Rate</label>
-            <input class="form-control" id="game-{{game._id}}-rate-value" placeholder="0:0" data-ng-model="rate.value" pattern="\d+:\d+" />
-          </div>
-          <button type="submit" class="btn btn-primary">Vote</button>
-        </form>
+                    <div class="form-group">
+                        <label class="sr-only" for="game-{{game._id}}-rate-value">Rate</label>
+                        <input class="form-control" id="game-{{game._id}}-rate-value" placeholder="0:0" data-ng-model="rate.value" pattern="\d+:\d+" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Vote</button>
+                </form>
 
-        <form class="form-inline" role="form" data-ng-submit="addScore(game);" data-ng-show="isBetween(game.starts,game.ends)">
-          <div class="form-group">
-            <label class="sr-only" for="game-{{game._id}}-score-value">Game score</label>
-            <input class="form-control" id="game-{{game._id}}-score-value" placeholder="0:0" data-ng-model="score.value" pattern="\d+:\d+" />
-          </div>
-          <button type="submit" class="btn btn-primary">Add</button>
-        </form>
+                <form class="form-inline" role="form" data-ng-submit="addScore(game);" data-ng-show="isBetween(game.starts,game.ends)">
+                    <div class="form-group">
+                        <label class="sr-only" for="game-{{game._id}}-score-value">Game score</label>
+                        <input class="form-control" id="game-{{game._id}}-score-value" placeholder="0:0" data-ng-model="score.value" pattern="\d+:\d+" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </form>
 
-        <form class="form-inline" role="form" data-ng-submit="removeGame(game._id);" data-ng-show="isAdmin()">
-          <button type="submit" class="btn btn-danger" >Delete</button>
-        </form>
+                <form class="form-inline" role="form" data-ng-submit="removeGame(game._id);" data-ng-show="isAdmin()">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
 
-      </div>
-      <div class="list-group-item" data-ng-show="isAdmin()">
-        <form class="form" role="form" data-ng-submit="addGame(game);">
-          Game
-          <div class="form-group">
-            <label for="game-vs">Title</label>
-            <input class="form-control" id="game-vs" data-ng-model="game.vs" />
-          </div>
-          <div class="form-group">
-            <label for="game-location_name">Location</label>
-            <input class="form-control" id="game-location_name" data-ng-model="game.location_name" />
-          </div>
-          <div class="form-group">
-            <label for="game-starts">Starts</label>
-            <input type="datetime-local" class="form-control" id="game-starts" data-ng-model="game.starts" />
-          </div>
-          <div class="form-group">
-            <label for="game-ends">Ends</label>
-            <input type="datetime-local" class="form-control" id="game-ends" data-ng-model="game.ends" />
-          </div>
-          <button type="submit" class="btn btn-primary">Create new game</button>
-        </form>
-      </div>
-    </div>
-  
-    <div class="row" data-ng-show="!user._id">
-      <div class="col-sm-6 col-md-4 col-md-offset-4 text-center">
-        <h1 class="login-title">Sign in</h1>
-        <div class="account-wall">
-          <img class="profile-img" src="https://lh5.googleusercontent.com/-b0-k99FZlyE/AAAAAAAAAAI/AAAAAAAAAAA/eu7opA4byxI/photo.jpg?sz=120"/>
-          <p>Login with <a href="/auth/facebook" class="btn btn-lg btn-primary btn-block"><i class="fa fa-facebook-square"></i> facebook</a></p>
+            </div>
+            <div class="list-group-item" data-ng-show="isAdmin()">
+                <form class="form" role="form" data-ng-submit="addGame(game);">
+                    Game
+                    <div class="form-group">
+                        <label for="game-vs">Title</label>
+                        <input class="form-control" id="game-vs" data-ng-model="game.vs" />
+                    </div>
+                    <div class="form-group">
+                        <label for="game-location_name">Location</label>
+                        <input class="form-control" id="game-location_name" data-ng-model="game.location_name" />
+                    </div>
+                    <div class="form-group">
+                        <label for="game-starts">Starts</label>
+                        <input type="datetime-local" class="form-control" id="game-starts" data-ng-model="game.starts" />
+                    </div>
+                    <div class="form-group">
+                        <label for="game-ends">Ends</label>
+                        <input type="datetime-local" class="form-control" id="game-ends" data-ng-model="game.ends" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create new game</button>
+                </form>
+            </div>
         </div>
-      </div>
-    </div>
-  </div>
-  <div id="videobg" class="hidden-xs"></div>
 
-  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.3/angular.min.js"></script>
-  <script type="text/javascript" src="script.js"></script>
-  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-  <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+        <div class="row" data-ng-show="!user._id">
+            <div class="col-sm-6 col-md-4 col-md-offset-4 text-center">
+                <h1 class="login-title">Sign in</h1>
+                <div class="account-wall">
+                    <img class="profile-img" src="https://lh5.googleusercontent.com/-b0-k99FZlyE/AAAAAAAAAAI/AAAAAAAAAAA/eu7opA4byxI/photo.jpg?sz=120" />
+                    <p>Login with <a href="/auth/facebook" class="btn btn-lg btn-primary btn-block"><i class="fa fa-facebook-square"></i> facebook</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="videobg" class="hidden-xs"></div>
+
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.3/angular.min.js"></script>
+    <script type="text/javascript" src="script.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
 
 </body>
 

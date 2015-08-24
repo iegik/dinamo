@@ -5,77 +5,77 @@
 
 // Dependences
 var Express = require("express"),
-  fs = require('fs'),
-  path = require('path'),
-  http = require('http'),
-  https = require('https'),
-  marked = require('marked'),
-  bodyParser = require('body-parser'),
-  methodOverride = require('method-override'),
-  errorHandler = require('errorhandler'),
-  passport = require('passport'),
-  expressSession = require('express-session'),
-  mongoose = require('mongoose'),
-  MongoStore = require('connect-mongo')(expressSession),
+    fs = require('fs'),
+    path = require('path'),
+    http = require('http'),
+    https = require('https'),
+    marked = require('marked'),
+    bodyParser = require('body-parser'),
+    methodOverride = require('method-override'),
+    errorHandler = require('errorhandler'),
+    passport = require('passport'),
+    expressSession = require('express-session'),
+    mongoose = require('mongoose'),
+    MongoStore = require('connect-mongo')(expressSession),
 
-  // Configuration
-  port = process.env.PORT || 5000,
-  port_ssl = process.env.PORT_SSL || 5001,
-  certificate = {
-    key: fs.readFileSync(path.resolve(__dirname, './self_signed_ssl.key'), 'utf8'),
-    cert: fs.readFileSync(path.resolve(__dirname, './self_signed_ssl.crt'), 'utf8')
-  },
-  db_path = 'mongodb://dinamo:78e43928150630ff947f234fcae00744@staff.mongohq.com:10024/reklama',
-  //jslint nomen: false
+    // Configuration
+    port = process.env.PORT || 5000,
+    port_ssl = process.env.PORT_SSL || 5001,
+    certificate = {
+        key: fs.readFileSync(path.resolve(__dirname, './self_signed_ssl.key'), 'utf8'),
+        cert: fs.readFileSync(path.resolve(__dirname, './self_signed_ssl.crt'), 'utf8')
+    },
+    db_path = 'mongodb://dinamo:78e43928150630ff947f234fcae00744@staff.mongohq.com:10024/reklama',
+    //jslint nomen: false
 
-  // Some useful functions
-  connectWithRetry = function () {
-    return mongoose.connect(db_path, function (err) {
-      if (err) {
-        console.error('Failed to connect to mongo on startup - retrying in 5 sec', err);
-        setTimeout(connectWithRetry, 5000);
-      }
-    });
-  },
+    // Some useful functions
+    connectWithRetry = function () {
+        return mongoose.connect(db_path, function (err) {
+            if (err) {
+                console.error('Failed to connect to mongo on startup - retrying in 5 sec', err);
+                setTimeout(connectWithRetry, 5000);
+            }
+        });
+    },
 
-  // Express
-  app = new Express();
+    // Express
+    app = new Express();
 
 connectWithRetry();
 require('./config/passport')(passport); // pass passport for configuration
 
 app.use(bodyParser.urlencoded({
-  extended: false
+    extended: false
 }));
 app.use(bodyParser.json());
 app.use(expressSession({
-  secret: process.env.DINAMO_APP_SECRET || 'dinamo',
-  //maxAge: new Date(Date.now() + 7 * 24 * 60 * 1000), // 1 week
-  //ttl: 7 * 24 * 60 * 1000,
-  store: new MongoStore({
-    mongooseConnection: mongoose.connections[0]
-  }),
-  resave: true,
-  saveUninitialized: true
+    secret: process.env.DINAMO_APP_SECRET || 'dinamo',
+    //maxAge: new Date(Date.now() + 7 * 24 * 60 * 1000), // 1 week
+    //ttl: 7 * 24 * 60 * 1000,
+    store: new MongoStore({
+        mongooseConnection: mongoose.connections[0]
+    }),
+    resave: true,
+    saveUninitialized: true
 }));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
 
-  // intercept OPTIONS method
-  if ('OPTIONS' === req.method) {
-    res.send(200);
-  } else {
-    next();
-  }
+    // intercept OPTIONS method
+    if ('OPTIONS' === req.method) {
+        res.send(200);
+    } else {
+        next();
+    }
 });
 app.use(methodOverride());
 app.use(errorHandler({
-  dumpExceptions: true,
-  showStack: true
+    dumpExceptions: true,
+    showStack: true
 }));
 
 app.use('/auth', require('./routes/auth'));
@@ -84,11 +84,11 @@ app.use(Express.static(path.join(__dirname, 'public')));
 
 //create node.js http server and listen on port
 http.createServer(app).listen(port, function () {
-  'use strict';
-  console.log("HTTP server is listening on..." + port);
+    'use strict';
+    console.log("HTTP server is listening on..." + port);
 });
 
 https.createServer(certificate, app).listen(port_ssl, function () {
-  'use strict';
-  console.log("HTTPS server is listening on..." + port_ssl);
+    'use strict';
+    console.log("HTTPS server is listening on..." + port_ssl);
 });
