@@ -1,3 +1,4 @@
+![travis-ci](https://travis-ci.org/iegik/dinamo.svg?branch=master)
 # Dinamo 
 ## Installation
 
@@ -10,23 +11,23 @@ npm start
 
 `/api`
 
-### [_] Security
+### Security
 
-![RESTful Security](./docs/RESTful%20security.gif)
+![RESTful Security](docs/RESTful%20security.gif)
 
 - Authorization with Facebook
 - Authentication by username
 - Permission check for admins
 
-### [_] Users
+### Users
 
 `/users/:username`
 
-### [_] Seasons
+### Seasons
 
 `/seasons/range/:range`
 
-### [_] Matches
+### Matches
 
 `/seasons/range/:range/matches/vs/:vs`
 `/matches/vs/:vs/season/range/:range`
@@ -61,11 +62,11 @@ curl -i -X PUT http://localhost:5000/api/matches/54ad8fc0e1baee456a272e0c\
 ```
 
 
-### [_] Rates
+### Rates
 
 `/seasons/:range/matches/:vs/rates/:username`
 
-### [_] Teams
+### Teams
 
 `/teams/:teamname`
 `/teams/:teamname/users/:username`
