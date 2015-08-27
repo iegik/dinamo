@@ -13,7 +13,6 @@
     "license": "ISC",
     "dependencies": {
         "async": "^0.9.0",
-        "auth": "0.0.9",
         "bcrypt-nodejs": "0.0.3",
         "body-parser": "~1.10.x",
         "bson": "^0.4.11",
