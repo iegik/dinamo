@@ -22,8 +22,8 @@ var Express = require("express"),
     port = process.env.PORT || 5000,
     port_ssl = process.env.PORT_SSL || 5001,
     certificate = {
-        key: process.env.SSL_KEY,
-        cert: process.env.SSL_CRT
+        key: new Buffer(process.env.SSL_KEY, 'base64').toString('utf8'),
+        cert: new Buffer(process.env.SSL_CRT, 'base64').toString('utf8')
     },
     db_path = process.env.DB_PATH,
     //jslint nomen: false
