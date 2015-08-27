@@ -8,5 +8,5 @@ before_script:
   - webdriver-manager start &
   - sleep 3
 script:
-  - npm start
+  - npm start &
   - npm test
