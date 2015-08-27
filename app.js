@@ -22,10 +22,10 @@ var Express = require("express"),
     port = process.env.PORT || 5000,
     port_ssl = process.env.PORT_SSL || 5001,
     certificate = {
-        key: fs.readFileSync(path.resolve(__dirname, './self_signed_ssl.key'), 'utf8'),
-        cert: fs.readFileSync(path.resolve(__dirname, './self_signed_ssl.crt'), 'utf8')
+        key: process.env.SSL_KEY,
+        cert: process.env.SSL_CRT
     },
-    db_path = 'mongodb://dinamo:78e43928150630ff947f234fcae00744@staff.mongohq.com:10024/reklama',
+    db_path = process.env.DB_PATH,
     //jslint nomen: false
 
     // Some useful functions
