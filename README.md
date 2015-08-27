@@ -1,4 +1,4 @@
-![travis-ci](https://travis-ci.org/iegik/dinamo.svg?branch=master)
+[![travis-ci](https://travis-ci.org/iegik/dinamo.svg?branch=master)](https://travis-ci.org/iegik/dinamo)
 # Dinamo 
 ## Installation
 

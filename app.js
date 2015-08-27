@@ -22,15 +22,15 @@ var Express = require("express"),
     port = process.env.PORT || 5000,
     port_ssl = process.env.PORT_SSL || 5001,
     certificate = {
-        key: new Buffer(process.env.SSL_KEY, 'base64').toString('utf8'),
-        cert: new Buffer(process.env.SSL_CRT, 'base64').toString('utf8')
+        key: process.env.SSL_KEY ? new Buffer(process.env.SSL_KEY, 'base64').toString('utf8') : fs.readFileSync('tests/fixtures/key.pem'),
+        cert: process.env.SSL_CRT ? new Buffer(process.env.SSL_CRT, 'base64').toString('utf8') : fs.readFileSync('tests/fixtures/key-cert.pem')
     },
     db_path = process.env.DB_PATH,
     //jslint nomen: false
 
     // Some useful functions
     connectWithRetry = function () {
-        return mongoose.connect(db_path, function (err) {
+        return db_path && mongoose.connect(db_path, function (err) {
             if (err) {
                 console.error('Failed to connect to mongo on startup - retrying in 5 sec', err);
                 setTimeout(connectWithRetry, 5000);
@@ -52,7 +52,7 @@ app.use(expressSession({
     secret: process.env.DINAMO_APP_SECRET || 'dinamo',
     //maxAge: new Date(Date.now() + 7 * 24 * 60 * 1000), // 1 week
     //ttl: 7 * 24 * 60 * 1000,
-    store: new MongoStore({
+    store: db_path && new MongoStore({
         mongooseConnection: mongoose.connections[0]
     }),
     resave: true,
