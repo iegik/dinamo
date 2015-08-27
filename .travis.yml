@@ -1,6 +1,11 @@
 language: node_js
 node_js:
   - "node"
-  - "iojs"
+before_script:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - webdriver-manager update
+  - webdriver-manager start &
+  - sleep 3
 script:
   - "npm start"
