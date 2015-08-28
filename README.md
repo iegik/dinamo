@@ -13,7 +13,7 @@ npm start
 
 ### Security
 
-![RESTful Security](docs/RESTful%20security.gif)
+![RESTful Security](docs/RESTful%20security.gif?raw=true)
 
 - Authorization with Facebook
 - Authentication by username
