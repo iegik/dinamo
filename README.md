@@ -13,7 +13,7 @@ npm start
 
 ### Security
 
-![RESTful Security](./docs/RESTful%20security.gif?raw=true)
+![RESTful Security](https://raw.githubusercontent.com/iegik/dinamo/master/docs/RESTful%20Security.gif)
 
 - Authorization with Facebook
 - Authentication by username
