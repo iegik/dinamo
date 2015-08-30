@@ -51,8 +51,10 @@ body {
 }
 
 .profile-img {
-    border-radius: 100%;
+    border-radius: 15px;
     padding: 2em;
+    font-size: 300%;
+    background-color: darkgrey;
 }
 
 .account-wall {
