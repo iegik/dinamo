@@ -1,4 +1,6 @@
 [![travis-ci](https://travis-ci.org/iegik/dinamo.svg?branch=master)](https://travis-ci.org/iegik/dinamo)
+[![bitHound Overall Score](https://www.bithound.io/github/iegik/dinamo/badges/score.svg)](https://www.bithound.io/github/iegik/dinamo)
+
 # Dinamo 
 ## Installation
 
