@@ -16,7 +16,7 @@ var Express = require("express"),
     passport = require('passport'),
     expressSession = require('express-session'),
     mongoose = require('mongoose'),
-    MongoStore = require('connect-mongo')(expressSession),
+    MongoStore = require('connect-mongo/es5')(expressSession),
 
     // Configuration
     port = process.env.PORT || 5000,
