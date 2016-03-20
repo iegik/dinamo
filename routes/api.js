@@ -15,12 +15,6 @@ var express = require('express'),
         }
         res.sendStatus(401);
     },
-    isAuthorized = function (req, res, next) {
-        if (req.user._id === req.params.user_id) {
-            return next();
-        }
-        res.sendStatus(403);
-    },
 
     isAdmin = function (req, res, next) {
         if ((req.user.roles).indexOf('admin') + 1) {
@@ -111,8 +105,8 @@ var express = require('express'),
 //Product.methods(['get', 'put', 'post', 'delete']);
 //Product.register(router, '/products')
 
-User.methods(['get', 'put', 'post', 'delete'])
-    // Policy
+User.methods(['get', 'put', 'post', 'delete']);
+// Policy
 User.before('get', isAuthenticated)
     .before('post', [isAuthenticated, isAdmin])
     .before('put', [isAuthenticated, isAdmin])
@@ -124,6 +118,7 @@ User.route('me', function (req, res, next) {
     } else {
         res.send(req.user);
     }
+    return next();
 });
 User.register(router, '/users');
 
@@ -135,19 +130,22 @@ Match.before('get', isAuthenticated)
     .before('delete', [isAuthenticated, isAdmin]);
 Match.after('get', function (req, res, next) {
     // Secure User Information
-    var x, y, z, match, select = function (arr, obj) {
+    var x, y, select = function (arr, obj) {
         var x, out = ({});
         for (x in obj) {
-            !(arr.indexOf(x) + 1) || (out[x] = obj[x]);
+            if (arr.indexOf(x) + 1) {
+                out[x] = obj[x];
+            }
         }
         return out;
-    }
+    };
     for (x in res.locals.bundle) {
         //res.locals.bundle[x] = select(['vs','rates'], res.locals.bundle[x]);
-        if (res.locals.bundle[x] && res.locals.bundle[x].rates)
+        if (res.locals.bundle[x] && res.locals.bundle[x].rates) {
             for (y in res.locals.bundle[x].rates) {
                 res.locals.bundle[x].rates[y].user = select(['displayName'], res.locals.bundle[x].rates[y].user);
             }
+        }
     }
     next();
 });
@@ -162,7 +160,9 @@ router.route('/matches/:id/rates').get(function (req, res) {
         rates: 1
     }, function (err, game) {
         console.log("game found", game);
-        if (!game) return res.sendStatus(400);
+        if (!game) {
+            return res.sendStatus(400);
+        }
 
         if (!err) {
             //return res[req.query.callback?'jsonp':'send'](game.rates.filter(function (score) {return score.name = ;}));
@@ -174,7 +174,9 @@ router.route('/matches/:id/rates').get(function (req, res) {
 });
 router.route('/matches/:id/rates').put([isAuthenticated], function (req, res) {
     console.log("PUT:", req.url, req.body, req.user.displayName);
-    if (!req.body && !req.body.name && true) return res.sendStatus(400);
+    if (!req.body && !req.body.name && true) {
+        return res.sendStatus(400);
+    }
     var gameid = req.params.id,
         userid = req.user._id, // || req.body.name,
         userrate = req.body.value,
