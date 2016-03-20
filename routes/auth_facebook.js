@@ -3,22 +3,15 @@ var express = require('express'),
     router = express.Router(),
     passport = require('passport'),
     mongoose = require('mongoose'),
-    FacebookStrategy = require('passport-facebook-canvas').Strategy,
-
-    // Models
-    User = require('../models/user');
+    FacebookStrategy = require('passport-facebook-canvas').Strategy;
 
 //require('../config/passport')(passport, User, FacebookStrategy);
-
-passport.serializeUser(function (user, done) {
+function acceptUser (user, done) {
     done(null, user);
-});
+}
 
-passport.deserializeUser(function (user, done) {
-    //User.findOne(user, function (err, user) {
-    done(null, user);
-    //});
-});
+passport.serializeUser(acceptUser);
+passport.deserializeUser(acceptUser);
 
 passport.use(new FacebookStrategy({
         clientID: process.env.FACEBOOK_APP_ID || '1643623779198614',
