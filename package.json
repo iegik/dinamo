@@ -12,10 +12,8 @@
   "author": "Arturs Jansons",
   "license": "ISC",
   "dependencies": {
-    "async": "~1.5.x",
     "bcrypt-nodejs": "~0.0.x",
     "body-parser": "~1.15.x",
-    "bson": "~0.4.x",
     "connect-mongo": "~1.1.x",
     "errorhandler": "~1.4.x",
     "express": "~4.13.x",
