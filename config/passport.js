@@ -47,19 +47,20 @@ module.exports = function (passport) {
                     'emails.value': email
                 }, function (err, user) {
                     // if there are any errors, return the error
-                    if (err)
+                    if (err) {
                         return done(err);
-
+                    }
                     // if no user is found, return the message
-                    if (!user)
+                    if (!user) {
                         return done(null, false, req.flash('loginMessage', 'No user found.'));
-
-                    if (!user.validPassword(password))
+                    }
+                    if (!user.validPassword(password)) {
                         return done(null, false, req.flash('loginMessage', 'Oops! Wrong password.'));
-
+                    }
                     // all is well, return user
-                    else
+                    else {
                         return done(null, user);
+                    }
                 });
             });
 
@@ -86,13 +87,14 @@ module.exports = function (passport) {
                 }, function (err, existingUser) {
 
                     // if there are any errors, return the error
-                    if (err)
+                    if (err) {
                         return done(err);
+                    }
 
                     // check to see if there's already a user with that email
-                    if (existingUser)
+                    if (existingUser) {
                         return done(null, false, req.flash('signupMessage', 'That email is already taken.'));
-
+                    }
                     //  If we're logged in, we're connecting a new local account.
                     if (req.user) {
                         var user = req.user;
@@ -102,8 +104,9 @@ module.exports = function (passport) {
                         });
                         user.password = user.generateHash(password);
                         user.save(function (err) {
-                            if (err)
+                            if (err) {
                                 throw err;
+                            }
                             return done(null, user);
                         });
                     }
@@ -119,9 +122,9 @@ module.exports = function (passport) {
                         newUser.password = newUser.generateHash(password);
 
                         newUser.save(function (err) {
-                            if (err)
+                            if (err) {
                                 throw err;
-
+                            }
                             return done(null, newUser);
                         });
                     }
@@ -279,9 +282,9 @@ module.exports = function (passport) {
                     User.findOne({
                         'twitter.id': profile.id
                     }, function (err, user) {
-                        if (err)
+                        if (err) {
                             return done(err);
-
+                        }
                         if (user) {
                             // if there is a user id already but no token (user was linked at one point and then removed)
                             if (!user.twitter.token) {
@@ -290,8 +293,9 @@ module.exports = function (passport) {
                                 user.twitter.displayName = profile.displayName;
 
                                 user.save(function (err) {
-                                    if (err)
+                                    if (err) {
                                         throw err;
+                                    }
                                     return done(null, user);
                                 });
                             }
@@ -307,8 +311,9 @@ module.exports = function (passport) {
                             newUser.twitter.displayName = profile.displayName;
 
                             newUser.save(function (err) {
-                                if (err)
+                                if (err) {
                                     throw err;
+                                }
                                 return done(null, newUser);
                             });
                         }
@@ -324,8 +329,9 @@ module.exports = function (passport) {
                     user.twitter.displayName = profile.displayName;
 
                     user.save(function (err) {
-                        if (err)
+                        if (err) {
                             throw err;
+                        }
                         return done(null, user);
                     });
                 }
@@ -356,9 +362,9 @@ module.exports = function (passport) {
                     User.findOne({
                         'google.id': profile.id
                     }, function (err, user) {
-                        if (err)
+                        if (err) {
                             return done(err);
-
+                        }
                         if (user) {
 
                             // if there is a user id already but no token (user was linked at one point and then removed)
@@ -368,8 +374,9 @@ module.exports = function (passport) {
                                 user.google.emails = profile.emails; // pull the first email
 
                                 user.save(function (err) {
-                                    if (err)
+                                    if (err) {
                                         throw err;
+                                    }
                                     return done(null, user);
                                 });
                             }
@@ -384,8 +391,9 @@ module.exports = function (passport) {
                             newUser.google.emails = profile.emails; // pull the first email
 
                             newUser.save(function (err) {
-                                if (err)
+                                if (err) {
                                     throw err;
+                                }
                                 return done(null, newUser);
                             });
                         }
@@ -401,8 +409,9 @@ module.exports = function (passport) {
                     user.google.emails = profile.emails; // pull the first email
 
                     user.save(function (err) {
-                        if (err)
+                        if (err) {
                             throw err;
+                        }
                         return done(null, user);
                     });
 
