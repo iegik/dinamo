@@ -1,43 +1,44 @@
 {
-    "name": "dinamo",
-    "version": "3.0.0",
-    "description": "Dinamo Riga lottery",
-    "repository": "https://git.heroku.com/dinamo.git",
-    "main": "app.js",
-    "scripts": {
-        "start": "node app.js",
-        "test": "npm run protractor",
-        "protractor": "protractor tests/protractor.conf.js"
-    },
-    "author": "Arturs Jansons",
-    "license": "ISC",
-    "dependencies": {
-        "async": "~1.5.x",
-        "bcrypt-nodejs": "~0.0.x",
-        "body-parser": "~1.14.x",
-        "bson": "~0.4.x",
-        "connect-mongo": "~1.1.x",
-        "connect-mongoose-session-store": "~2.0.x",
-        "errorhandler": "~1.4.x",
-        "express": "~4.13.x",
-        "express-session": "~1.9.x",
-        "marked": "~0.3.x",
-        "method-override": "~2.3.x",
-        "mongoose": "~4.4.x",
-        "mongoose-findorcreate": "~0.1.x",
-        "mongoose-session": "~0.0.x",
-        "node-restful": "~0.2.x",
-        "passport": "~0.3.x",
-        "passport-facebook": "~2.1.x",
-        "passport-facebook-canvas": "~0.0.x",
-        "passport-google-oauth": "~1.0.x",
-        "passport-local": "~1.0.x",
-        "passport-twitter": "~1.0.x"
-    },
-    "engines": {
-        "node": "0.10.x"
-    },
-    "devDependencies": {
-        "protractor": "^3.0.0"
-    }
+  "name": "dinamo",
+  "version": "3.0.0",
+  "description": "Dinamo Riga lottery",
+  "repository": "https://git.heroku.com/dinamo.git",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "npm run protractor",
+    "protractor": "protractor tests/protractor.conf.js"
+  },
+  "author": "Arturs Jansons",
+  "license": "ISC",
+  "dependencies": {
+    "async": "~1.5.x",
+    "bcrypt-nodejs": "~0.0.x",
+    "body-parser": "~1.14.x",
+    "bson": "~0.4.x",
+    "connect-mongo": "~1.1.x",
+    "connect-mongoose-session-store": "~2.0.x",
+    "errorhandler": "~1.4.x",
+    "express": "~4.13.x",
+    "express-session": "~1.9.x",
+    "marked": "~0.3.x",
+    "method-override": "~2.3.x",
+    "mongoose": "~4.4.x",
+    "mongoose-findorcreate": "~0.1.x",
+    "mongoose-session": "~0.0.x",
+    "node-restful": "~0.2.x",
+    "passport": "~0.3.x",
+    "passport-facebook": "~2.1.x",
+    "passport-facebook-canvas": "~0.0.x",
+    "passport-google-oauth": "~1.0.x",
+    "passport-local": "~1.0.x",
+    "passport-twitter": "~1.0.x"
+  },
+  "engines": {
+    "node": "0.10.x"
+  },
+  "devDependencies": {
+    "jscs": "^2.11.0",
+    "protractor": "^3.0.0"
+  }
 }
