@@ -1,7 +1,7 @@
 //FIXME: For tests only
 var api = '/api';
 
-(function () {
+(function (angular) {
     'use strict';
     var games = [],
         app = angular.module('app', []);
@@ -33,16 +33,16 @@ var api = '/api';
         };
         $scope.addGame = function () {
             $window.console.log($scope.game);
-            $http.post(api + '/matches', $scope.game).success(function (err) {
+            $http.post(api + '/matches', $scope.game).success(function () {
                 $scope.game = {};
             });
-        }
+        };
         $scope.removeGame = function (id) {
-            $http.delete(api + '/matches/' + id).success(function (err) {});
-        }
+            $http.delete(api + '/matches/' + id).success(function () {});
+        };
         $scope.isAdmin = function () {
             return !!$scope.user.roles && $scope.user.roles.indexOf('admin') >= 0;
-        }
+        };
 
         $scope.init = $scope.getUser();
     });
@@ -54,7 +54,7 @@ var api = '/api';
             $http.put(api + '/matches/' + game._id + '/rates', $scope.rate).success(function () {
                 if (game.rates && game.rates.filter) {
                     game.rates = game.rates.filter(function (a) {
-                        return a.user._id !== $scope.user._id
+                        return a.user._id !== $scope.user._id;
                     });
                     game.rates.push($scope.rate);
                 } else {
@@ -82,4 +82,4 @@ var api = '/api';
         };
     });
 
-})();
+})(angular);

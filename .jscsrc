@@ -1,3 +1,6 @@
 {
-	"preset": "crockford"
+	"preset": "crockford",
+    "globals": {
+        "angular": true
+    }
 }
