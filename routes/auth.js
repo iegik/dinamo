@@ -13,13 +13,6 @@ var express = require('express'),
         failureRedirect: '/#connect', // redirect back to the signup page if there is an error
     });
 
-// route middleware to ensure user is logged in
-function isLoggedIn(req, res, next) {
-    if (req.isAuthenticated())
-        return next();
-
-    res.redirect('/');
-}
 // normal routes ===============================================================
 
 // LOGOUT ==============================
@@ -89,7 +82,7 @@ router.route('/local/unlink').get(function (req, res) {
     var user = req.user;
     user.local.email = undefined;
     user.local.password = undefined;
-    user.save(function (err) {
+    user.save(function () {
         res.redirect(action_authenticate.successRedirect);
     });
 });
@@ -98,7 +91,7 @@ router.route('/local/unlink').get(function (req, res) {
 router.route('/facebook/unlink').get(function (req, res) {
     var user = req.user;
     user.facebook.token = undefined;
-    user.save(function (err) {
+    user.save(function () {
         res.redirect(action_authenticate.successRedirect);
     });
 });
@@ -107,7 +100,7 @@ router.route('/facebook/unlink').get(function (req, res) {
 router.route('/twitter/unlink').get(function (req, res) {
     var user = req.user;
     user.twitter.token = undefined;
-    user.save(function (err) {
+    user.save(function () {
         res.redirect(action_authenticate.successRedirect);
     });
 });
@@ -116,7 +109,7 @@ router.route('/twitter/unlink').get(function (req, res) {
 router.route('/google/unlink').get(function (req, res) {
     var user = req.user;
     user.google.token = undefined;
-    user.save(function (err) {
+    user.save(function () {
         res.redirect(action_authenticate.successRedirect);
     });
 });
