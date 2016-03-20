@@ -3,6 +3,7 @@ var express = require('express'),
     router = express.Router(),
     passport = require('passport'),
     mongoose = require('mongoose'),
+    authed = require('../lib/authed'),
     FacebookStrategy = require('passport-facebook-canvas').Strategy;
 
 //require('../config/passport')(passport, User, FacebookStrategy);
@@ -30,13 +31,7 @@ passport.use(new FacebookStrategy({
             User.findOrCreate({
                 provider: 'facebook',
                 id: profile.id
-            }, profile, function (err, user) {
-                if (err) {
-                    console.log(err);
-                    return done(err);
-                }
-                done(null, user);
-            });
+            }, profile, authed.bind(done));
         });
     }));
 

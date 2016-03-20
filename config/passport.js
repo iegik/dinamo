@@ -1,14 +1,12 @@
 // load all the things we need
-var LocalStrategy = require('passport-local').Strategy;
-var FacebookStrategy = require('passport-facebook').Strategy;
-var TwitterStrategy = require('passport-twitter').Strategy;
-var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+var LocalStrategy = require('passport-local').Strategy,
+    FacebookStrategy = require('passport-facebook').Strategy,
+    TwitterStrategy = require('passport-twitter').Strategy,
+    GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
+    User = require('../models/user'),
 
-// load up the user model
-var User = require('../models/user');
-
-// load the auth variables
-var configAuth = require('./auth'); // use this one for testing
+    authed = require('../lib/authed'),
+    configAuth = require('./auth'); // use this one for testing
 
 module.exports = function (passport) {
 
@@ -103,12 +101,7 @@ module.exports = function (passport) {
                             value: email || user.username
                         });
                         user.password = user.generateHash(password);
-                        user.save(function (err) {
-                            if (err) {
-                                throw err;
-                            }
-                            return done(null, user);
-                        });
+                        user.save(authed.bind(done));
                     }
                     //  We're not logged in, so we're creating a brand new user.
                     else {
@@ -121,12 +114,7 @@ module.exports = function (passport) {
                         }];
                         newUser.password = newUser.generateHash(password);
 
-                        newUser.save(function (err) {
-                            if (err) {
-                                throw err;
-                            }
-                            return done(null, newUser);
-                        });
+                        newUser.save(authed.bind(done));
                     }
 
                 });
@@ -168,13 +156,7 @@ module.exports = function (passport) {
                 }
                 User.findOrCreate({
                     'facebook.id': profile.id
-                }, profile, function (err, user) {
-                    if (err) {
-                        console.log(err);
-                        return done(err);
-                    }
-                    done(null, user);
-                });
+                }, profile, authed.bind(done));
             });
         }
         /*
@@ -310,12 +292,7 @@ module.exports = function (passport) {
                             newUser.twitter.username = profile.username;
                             newUser.twitter.displayName = profile.displayName;
 
-                            newUser.save(function (err) {
-                                if (err) {
-                                    throw err;
-                                }
-                                return done(null, newUser);
-                            });
+                            newUser.save(authed.bind(done));
                         }
                     });
 
@@ -328,12 +305,7 @@ module.exports = function (passport) {
                     user.twitter.username = profile.username;
                     user.twitter.displayName = profile.displayName;
 
-                    user.save(function (err) {
-                        if (err) {
-                            throw err;
-                        }
-                        return done(null, user);
-                    });
+                    user.save(authed.bind(done));
                 }
 
             });
@@ -373,29 +345,19 @@ module.exports = function (passport) {
                                 user.google.name = profile.displayName;
                                 user.google.emails = profile.emails; // pull the first email
 
-                                user.save(function (err) {
-                                    if (err) {
-                                        throw err;
-                                    }
-                                    return done(null, user);
-                                });
+                                user.save(authed.bind(done));
                             }
 
                             return done(null, user);
                         } else {
-                            var newUser = new User();
+                            user = new User();
 
-                            newUser.google.id = profile.id;
-                            newUser.google.token = token;
-                            newUser.google.name = profile.displayName;
-                            newUser.google.emails = profile.emails; // pull the first email
+                            user.google.id = profile.id;
+                            user.google.token = token;
+                            user.google.name = profile.displayName;
+                            user.google.emails = profile.emails; // pull the first email
 
-                            newUser.save(function (err) {
-                                if (err) {
-                                    throw err;
-                                }
-                                return done(null, newUser);
-                            });
+                            user.save(authed.bind(done));
                         }
                     });
 
@@ -408,12 +370,7 @@ module.exports = function (passport) {
                     user.google.name = profile.displayName;
                     user.google.emails = profile.emails; // pull the first email
 
-                    user.save(function (err) {
-                        if (err) {
-                            throw err;
-                        }
-                        return done(null, user);
-                    });
+                    user.save(authed.bind(done));
 
                 }
 
