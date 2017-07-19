@@ -30,9 +30,6 @@
     "passport-local": "~1.0.x",
     "passport-twitter": "~1.0.x"
   },
-  "engines": {
-    "node": "0.10.x"
-  },
   "devDependencies": {
     "jscs": "^2.11.0",
     "protractor": "^3.0.0"
