@@ -1,6 +1,6 @@
 [![travis-ci](https://travis-ci.org/iegik/dinamo.svg?branch=master)](https://travis-ci.org/iegik/dinamo)
 [![bitHound Overall Score](https://www.bithound.io/github/iegik/dinamo/badges/score.svg)](https://www.bithound.io/github/iegik/dinamo)
-[![](https://codescene.io/projects/3053/status.svg) Get more details at **codescene.io**.](https://codescene.io/projects/3053/jobs/latest-successful/results)
+[![](https://codescene.io/projects/3053/status.svg) Get more details at **codescene.io**. ](https://codescene.io/projects/3053/jobs/latest-successful/results)
 
 # Dinamo 
 ## Installation
