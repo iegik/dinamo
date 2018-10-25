@@ -16,7 +16,7 @@
     "body-parser": "~1.15.x",
     "connect-mongo": "~1.1.x",
     "errorhandler": "~1.4.x",
-    "express": "~4.13.x",
+    "express": "~4.15.5",
     "express-session": "~1.13.x",
     "marked": "~0.3.x",
     "method-override": "~2.3.x",
