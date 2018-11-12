@@ -1,0 +1,53 @@
+{
+  "name": "dinamo",
+  "scripts": {
+  },
+  "env": {
+    "DB_PATH": {
+      "required": true
+    },
+    "DINAMO_APP_SECRET": {
+      "required": true
+    },
+    "DOMAIN": {
+      "required": true
+    },
+    "FACEBOOK_APP_ID": {
+      "required": true
+    },
+    "FACEBOOK_APP_SECRET": {
+      "required": true
+    },
+    "GOOGLE_APP_ID": {
+      "required": true
+    },
+    "GOOGLE_APP_SECRET": {
+      "required": true
+    },
+    "SSL_CRT": {
+      "required": true
+    },
+    "SSL_KEY": {
+      "required": true
+    },
+    "TWITTER_APP_ID": {
+      "required": true
+    },
+    "TWITTER_APP_SECRET": {
+      "required": true
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1
+    }
+  },
+  "addons": [
+
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
+}
