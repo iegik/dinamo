@@ -18,7 +18,7 @@
     "errorhandler": "~1.4.x",
     "express": "~4.15.5",
     "express-session": "~1.13.x",
-    "marked": "~0.3.x",
+    "marked": "~0.6.2",
     "method-override": "~2.3.x",
     "mongoose": "~4.13.17",
     "mongoose-findorcreate": "~0.1.x",
