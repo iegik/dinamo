@@ -7,7 +7,9 @@
   "scripts": {
     "start": "node app.js",
     "test": "npm run protractor",
-    "protractor": "protractor tests/protractor.conf.js"
+    "protractor": "protractor tests/protractor.conf.js",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "author": "Arturs Jansons",
   "license": "ISC",
@@ -28,10 +30,12 @@
     "passport-facebook-canvas": "~0.0.x",
     "passport-google-oauth": "~1.0.x",
     "passport-local": "~1.0.x",
-    "passport-twitter": "~1.0.x"
+    "passport-twitter": "~1.0.x",
+    "snyk": "^1.189.0"
   },
   "devDependencies": {
     "jscs": "^2.11.0",
     "protractor": "^3.0.0"
-  }
+  },
+  "snyk": true
 }
