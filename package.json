@@ -31,7 +31,7 @@
     "passport-google-oauth": "~1.0.x",
     "passport-local": "~1.0.x",
     "passport-twitter": "~1.0.x",
-    "snyk": "^1.189.0"
+    "snyk": "^1.231.0"
   },
   "devDependencies": {
     "jscs": "^2.11.0",
