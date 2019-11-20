@@ -22,7 +22,7 @@
     "express-session": "~1.13.x",
     "marked": "~0.7.0",
     "method-override": "~2.3.x",
-    "mongoose": "~5.4.10",
+    "mongoose": "~5.7.5",
     "mongoose-findorcreate": "~0.1.x",
     "node-restful": "~0.2.x",
     "passport": "~0.3.x",
@@ -31,7 +31,7 @@
     "passport-google-oauth": "~1.0.x",
     "passport-local": "~1.0.x",
     "passport-twitter": "~1.0.x",
-    "snyk": "^1.189.0"
+    "snyk": "^1.231.0"
   },
   "devDependencies": {
     "jscs": "^2.11.0",
