@@ -15,10 +15,10 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt-nodejs": "~0.0.x",
-    "body-parser": "~1.15.x",
+    "body-parser": "~1.19.2",
     "connect-mongo": "~3.0.0",
     "errorhandler": "~1.4.x",
-    "express": "~4.15.5",
+    "express": "~4.17.3",
     "express-session": "~1.13.x",
     "marked": "~4.0.10",
     "method-override": "~2.3.x",
