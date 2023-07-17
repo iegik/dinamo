@@ -22,7 +22,7 @@
     "express-session": "~1.13.x",
     "marked": "~4.0.10",
     "method-override": "~2.3.x",
-    "mongoose": "~5.12.3",
+    "mongoose": "~5.13.20",
     "mongoose-findorcreate": "~0.1.x",
     "node-restful": "~0.2.x",
     "passport": "~0.3.x",
